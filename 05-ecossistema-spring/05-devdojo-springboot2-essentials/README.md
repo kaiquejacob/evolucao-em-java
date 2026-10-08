@@ -408,25 +408,6 @@ Tests      : JUNIT 5 + MOCKITO
 Status     : COMPLETED
 ```
 
----
-
-## `PRÓXIMOS PASSOS`
-
-O Spring Boot 2.x saiu do suporte open source, e o restante do repositório já usa Spring Boot 3+. Migrar este projeto cobre, na prática:
-
-| Mudança                                   | De                                  | Para                                         |
-| ----------------------------------------- | ----------------------------------- | -------------------------------------------- |
-| Namespace do Jakarta EE                   | `javax.persistence`, `javax.validation` | `jakarta.persistence`, `jakarta.validation` |
-| Configuração do Security                  | `WebSecurityConfigurerAdapter`      | Bean `SecurityFilterChain`                   |
-| Versão mínima do Java                     | 8 / 11                              | 17                                           |
-| Documentação da API                       | —                                   | OpenAPI (springdoc)                          |
-
-- [ ] Migrar para Spring Boot 3
-- [ ] Documentar a API com OpenAPI/Swagger
-- [ ] Trocar HTTP Basic por autenticação JWT
-
----
-
 ## `CRÉDITOS`
 
-Conteúdo baseado no curso **Spring Boot 2 Essentials** da [DevDojo](https://github.com/devdojobr). O código foi desenvolvido por mim durante o acompanhamento do curso.
+Conteúdo baseado no curso **Spring Boot 2 Essentials** da [DevDojo](https://github.com/devdojobr).
