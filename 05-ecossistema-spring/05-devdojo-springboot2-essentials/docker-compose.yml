@@ -1,0 +1,53 @@
+x-database-variables: &database-variables
+  SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/anime?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+  SPRING_DATASOURCE_USERNAME: root
+  SPRING_DATASOURCE_PASSWORD: root
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: anime
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - devdojo_data:/var/lib/mysql
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - "./src/main/resources/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+    mem_limit: 128m
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    mem_limit: 128m
+
+  springboot2-essentials:
+    image: registry.hub.docker.com/kaiquejacob/springboot2-essentials:0.0.1-SNAPSHOT
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *database-variables
+    mem_limit: 512m
+
+volumes:
+  devdojo_data:
