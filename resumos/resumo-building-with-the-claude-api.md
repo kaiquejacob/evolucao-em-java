@@ -3,7 +3,13 @@
 > Material de estudo teórico baseado nas transcrições do curso **Building with the Claude API**.  
 > Objetivo: compreender os conceitos de LLMs, Claude API, prompts, tool use, RAG, embeddings, busca híbrida, MCP, agentes e workflows.
 
-> **Nota sobre os exemplos:** os exemplos de código do curso foram originalmente escritos em Python com o SDK da Anthropic. Neste guia, eles foram **adaptados para Java**, usando Java padrão e, quando adequado, conceitos de Spring Boot/Spring AI. Como nomes exatos de classes e métodos do Spring AI podem variar conforme a versão, exemplos que dependem de integração específica estão marcados como **conceituais em Java** e devem ser conferidos na documentação da versão utilizada.
+> **Nota sobre os exemplos:** os exemplos de código do curso foram originalmente escritos em Python com o SDK da Anthropic. Neste guia, eles foram **adaptados para Java**, usando Java padrão e, quando adequado, Spring Boot/Spring AI.  
+>
+> **Diferenciação importante:**
+>
+> - **Código executável em Java:** exemplos de lógica Java que não dependem de uma integração específica com provedor de IA, como chunking, cálculo de similaridade e validação de JSON.
+> - **Exemplo conceitual em Java:** exemplos que representam a intenção da chamada à API, mas dependem de configuração, versão do Spring AI ou recursos específicos do provedor. Neles, `chatClient` representa um bean Spring configurado/injetado; não é uma variável global.
+> - Nomes exatos de classes e métodos do Spring AI podem variar conforme a versão. Confira sempre a documentação da versão utilizada no projeto.
 
 **Nota sobre fontes e limitações:** este guia usa como referência principal as transcrições dos módulos disponíveis no projeto. As seções **Multi-Index RAG pipeline**, **Text Editor Tool**, **Web Search Tool**, **Code Execution** e **Files API** aparecem no índice do curso, mas as transcrições disponíveis não trazem seu detalhamento completo; onde isso ocorre, a limitação está indicada.
 
@@ -223,16 +229,17 @@ A **temperatura** controla o grau de aleatoriedade na escolha do próximo token.
 
 **O que a temperatura não faz:** ela não garante respostas diferentes nem corrige erros factuais. Ela altera probabilidades de escolha, não a veracidade do conteúdo.
 
-**Exemplo conceitual em Java:**
+**Exemplo em Spring AI — sujeito à versão utilizada:**
 
 ```java
 double temperatura = 0.2; // mais previsível
 
-// A intenção é enviar a temperatura junto com a requisição.
-// O nome exato do método/options depende da versão do Spring AI e do provedor.
+// ChatClient e ChatModel devem estar configurados/injetados na aplicação.
+// A forma exata de construir options pode variar conforme a versão do Spring AI
+// e o provedor configurado; confira a documentação da versão do seu projeto.
 var resposta = chatClient.prompt()
     .user("Gere uma ideia de filme")
-    .options(options -> options.temperature(temperatura))
+    .options(ChatOptions.builder().temperature(temperatura).build())
     .call()
     .content();
 ```
@@ -401,7 +408,7 @@ Para código, o curso separa critérios:
 - **Sintaxe válida:** o código precisa ser parseável.
 - **Aderência à tarefa:** a solução realmente resolve o pedido.
 
-**Exemplo em Java — validação de JSON com Jackson:**
+**Exemplo executável em Java — validação de JSON com Jackson:**
 
 ```java
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -645,9 +652,11 @@ Um **tool schema** descreve a ferramenta para o modelo:
 - Tipos esperados.
 - Descrição de cada parâmetro.
 
-**Exemplo conceitual em Java — representação do schema:**
+**Exemplo executável em Java — representação do schema:**
 
 ```java
+// Records Java puros: representam a estrutura conceitual de um tool schema.
+// A serialização exata para o formato exigido pelo provedor depende da integração.
 record ToolParameter(
     String name,
     String type,
@@ -661,7 +670,7 @@ record ToolSchema(
     List<ToolParameter> parameters
 ) {}
 
-var get_current_datetime = new ToolSchema(
+var getCurrentDatetime = new ToolSchema(
     "get_current_datetime",
     "Retorna a data e hora atuais.",
     List.of()
@@ -686,9 +695,11 @@ O `ToolUse block` contém:
 - `input`: argumentos.
 - `type`: `tool_use`.
 
-**Exemplo conceitual em Java:**
+**Exemplo executável em Java — representação dos blocos:**
 
 ```java
+// Records Java puros: representam os blocos conceituais trocados na conversa.
+// A serialização exata depende do formato exigido pelo provedor.
 record ToolUseBlock(
     String id,
     String name,
@@ -824,7 +835,7 @@ A qualidade do chunking afeta diretamente o RAG. Um chunk mal cortado pode separ
 
 **Overlap** é a repetição de uma pequena parte do chunk anterior no próximo. Ele preserva contexto e reduz o risco de cortar informações importantes.
 
-**Exemplo em Java — chunking por tamanho com overlap:**
+**Exemplo executável em Java — chunking por tamanho com overlap:**
 
 ```java
 import java.util.ArrayList;
@@ -879,9 +890,11 @@ Essas frases podem ter embeddings próximos, embora usem palavras diferentes.
 
 O curso usa VoyageAI para embeddings e observa que a Anthropic não oferecia geração de embeddings no momento do material.
 
-**Exemplo conceitual em Java — representação:**
+**Exemplo executável em Java — representação de dados:**
 
 ```java
+// Record Java puro: representa um chunk e seu vetor.
+// Não depende de Spring AI nem de provedor específico.
 record EmbeddedChunk(String content, double[] embedding) {}
 ```
 
@@ -931,7 +944,7 @@ Com distance:
 - Valor próximo de **0**: alta similaridade.
 - Valor maior: menor similaridade.
 
-**Exemplo em Java — cálculo de similaridade de cosseno:**
+**Exemplo executável em Java — cálculo de similaridade de cosseno:**
 
 ```java
 static double cosineSimilarity(double[] a, double[] b) {
@@ -1216,9 +1229,12 @@ No exemplo do curso, o servidor mantém documentos em memória e expõe:
 - `read_doc_contents`: lê um documento por ID.
 - `edit_document`: substitui um texto exato por outro.
 
-**Exemplo conceitual em Java — lógica equivalente da ferramenta:**
+**Exemplo executável em Java — lógica equivalente da ferramenta:**
 
 ```java
+import java.util.HashMap;
+import java.util.Map;
+
 class DocumentService {
 
     private final Map<String, String> documents = new HashMap<>();
@@ -1584,11 +1600,21 @@ Sempre permitir que o agente verifique se a ação teve o efeito esperado.
 - Exemplos que dependem de recursos específicos da Claude API — como `cache_control`, `fine_grained`, tool blocks e schemas — foram mantidos como **conceituais em Java**, para não inventar APIs ou métodos inexistentes.
 - A teoria, a estrutura dos 12 capítulos, as tabelas e as explicações do resumo original foram preservadas.
 
-## Pontos não confirmados nas fontes
+## Correções técnicas desta revisão
 
-- **Multi-Index RAG pipeline:** o tópico existe no índice do Módulo 5, mas a transcrição disponível não detalha sua arquitetura, índices ou forma de combinação.
-- **Text Editor Tool:** consta no índice do Módulo 4, mas não há detalhamento suficiente nas transcrições fornecidas.
-- **Web Search Tool:** consta no índice do Módulo 4, mas não há detalhamento suficiente nas transcrições fornecidas.
-- **Code Execution:** consta no índice do Módulo 6, mas a transcrição disponível não detalha o recurso.
-- **Files API:** consta no índice do Módulo 6, mas a transcrição disponível não detalha o recurso.
-- **Detalhes completos do projeto de tool use:** o arquivo do Módulo 4 disponível retorna apenas trechos; partes intermediárias sobre schemas completos, múltiplas interações e múltiplas ferramentas não puderam ser verificadas linha a linha.
+- **Corrigido o exemplo de temperatura:** a forma `.options(options -> options.temperature(...))` não corresponde à API fluente do Spring AI. Foi substituída por `ChatOptions.builder().temperature(...).build()`, com ressalva explícita de que a construção exata de options pode variar conforme a versão do Spring AI e o provedor.
+- **Clarificada a natureza dos exemplos:** o guia agora distingue explicitamente **código executável em Java** — lógica independente de provedor, como chunking, cosine similarity e validação JSON — de **exemplos conceituais**, que representam a intenção da chamada à API.
+- **Clarificado o `chatClient`:** nos exemplos Spring AI, `chatClient` representa um bean configurado/injetado na aplicação, não uma variável global ou classe estática.
+- **Corrigida a classificação do `EmbeddedChunk`:** agora está identificado como exemplo executável em Java puro, pois é apenas um `record` de representação de dados, sem dependência de Spring AI ou provedor.
+- **Corrigida a nomenclatura do tool schema:** a variável Java foi renomeada de `get_current_datetime` para `getCurrentDatetime`, seguindo a convenção Java; o nome da ferramenta exposto ao modelo continua `get_current_datetime`.
+- **Corrigido erro de texto:** “Explicai melhor a diferença” foi corrigido para “Explicitei melhor a diferença”.
+- **Reforçada a ressalva de compatibilidade:** os exemplos Spring AI devem ser conferidos contra a versão utilizada no projeto, pois nomes de classes, builders e opções podem mudar entre versões.
+- **Mantidas as ressalvas sobre fontes incompletas:** Multi-Index RAG pipeline, Text Editor Tool, Web Search Tool, Code Execution e Files API continuam marcados como não detalhados nas transcrições disponíveis.
+
+## Pontos que ainda precisam ser verificados
+
+- **Versão do Spring AI no seu projeto:** confirme se `ChatClient`, `ChatOptions.builder()`, `.stream().content()` e a forma de configurar o provedor correspondem à versão usada.
+- **Provedor Groq via Spring AI:** verifique quais opções de chat — como temperatura, `maxTokens` e tool calling — são efetivamente suportadas pela integração/configuração utilizada.
+- **Tool calling no Spring AI:** a forma de declarar ferramentas, expor schemas e tratar `tool_use`/`tool_result` varia entre versões e provedores; os exemplos deste guia são conceituais e não devem ser copiados sem conferência.
+- **Recursos específicos da Claude API:** `cache_control`, `fine_grained`, thinking blocks, citations e tool blocks são recursos da API Anthropic; não assuma equivalência direta na Groq ou no Spring AI.
+- **Tópicos sem detalhe nas transcrições:** Multi-Index RAG pipeline, Text Editor Tool, Web Search Tool, Code Execution e Files API permanecem sem detalhamento suficiente nas fontes fornecidas.
