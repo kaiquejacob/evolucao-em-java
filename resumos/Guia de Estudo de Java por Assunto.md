@@ -2926,6 +2926,156 @@ dependencies {
 
 **Explicação do exemplo**: as duas configurações declaram o mesmo: o *starter* web (versão controlada pelo BOM do Spring Boot, por isso sem `<version>`), o driver do MySQL só para a execução (`runtime`/`runtimeOnly`) e o *starter* de testes apenas nos testes. No Gradle, o Lombok é `compileOnly` (não vai no pacote final) **e** `annotationProcessor` (para o `javac` executá-lo). O `clean package` do Maven percorre as fases até `package`, rodando os testes no caminho.
 
+### Aprofundamento: `pom.xml`, `build.gradle`, ciclo de vida, plugins e *wrappers*
+
+**O que é**: detalhamento do que foi visto acima sobre Maven e Gradle: a **anatomia** dos arquivos de configuração, o que acontece em cada etapa do build, como os **plugins** entram no processo e como os ***wrappers*** garantem que todo mundo use a mesma versão da ferramenta.
+
+**Para que serve**: ler e escrever esses arquivos sem decorar receitas: saber **onde** declarar versões, **por que** um plugin roda em determinada fase e como reproduzir o mesmo build em qualquer máquina ou no servidor de integração contínua.
+
+**Como funciona**:
+
+**Anatomia do `pom.xml` (Maven)**: o POM (*Project Object Model*) descreve o projeto.
+
+- **`<parent>`**: herda a configuração de outro POM. O `spring-boot-starter-parent` traz o BOM, as versões dos plugins e padrões como `java.version`. Se o projeto já tem outro *parent*, importe o BOM em `dependencyManagement` com `<scope>import</scope>` e `<type>pom</type>`.
+- **`<properties>`**: variáveis reutilizáveis (`${java.version}`); centralizam versões em um só lugar.
+- **`<packaging>`**: `jar` (padrão), `war` ou `pom` (projeto **agregador**, de múltiplos módulos).
+- **`<dependencies>` x `<dependencyManagement>`**: o segundo apenas **fixa versões** e não adiciona nada ao projeto; o primeiro **inclui** a dependência de fato. `<exclusions>` remove uma dependência **transitiva** indesejada; `<optional>true</optional>` impede que ela seja repassada a quem consome o seu módulo.
+- **`<build><plugins>`**: configura os plugins e liga seus *goals* às fases (`<executions>`).
+- **`<profiles>`**: conjuntos de configuração ativados por `-Pnome` ou por condição (JDK, sistema operacional, propriedade).
+- **Multimódulo**: um POM pai lista `<modules>`; cada módulo herda do pai. `mvn -pl modulo -am package` compila só o módulo pedido e os que ele precisa.
+- **Repositórios**: o **local** (`~/.m2/repository`, um *cache*), o **Maven Central** (padrão) e repositórios corporativos (Nexus, Artifactory), configurados em `settings.xml`. Cada artefato é baixado uma vez.
+
+**Fases x *goals* (Maven)**: existem três ciclos de vida independentes: `default` (build), `clean` e `site`. Uma **fase** é uma etapa do ciclo; um ***goal*** é uma tarefa concreta de um **plugin**, no formato `plugin:goal`. Cada fase executa os *goals* ligados a ela. Para o empacotamento `jar`:
+
+| Fase | *Goal* padrão | O que faz |
+| --- | --- | --- |
+| `process-resources` | `resources:resources` | copia `src/main/resources` para `target/classes` |
+| `compile` | `compiler:compile` | compila `src/main/java` |
+| `test-compile` | `compiler:testCompile` | compila os testes |
+| `test` | `surefire:test` | executa os testes unitários |
+| `package` | `jar:jar` | gera o `.jar` (no Spring Boot, `spring-boot:repackage` o transforma em *fat JAR*) |
+| `integration-test` / `verify` | `failsafe:integration-test` / `failsafe:verify` | só rodam se o Failsafe estiver configurado (testes `*IT`) |
+| `install` | `install:install` | copia o artefato para o repositório local (`~/.m2`) |
+| `deploy` | `deploy:deploy` | publica em um repositório remoto |
+
+Um *goal* também pode ser chamado direto, fora do ciclo: `mvn spring-boot:run`, `mvn dependency:tree`. Atalhos úteis: `-DskipTests` (compila os testes, mas não os executa), `-Dmaven.test.skip=true` (nem compila) e `-o` (modo *offline*).
+
+**Anatomia do Gradle**: o build tem **três fases**: ***initialization*** (lê o `settings.gradle` e decide quais projetos participam), ***configuration*** (executa o `build.gradle` e monta o **grafo de tarefas**) e ***execution*** (roda só as tarefas pedidas e as de que elas dependem).
+
+- **Tarefas (*tasks*)**: `compileJava`, `processResources`, `test`, `jar` (ou `bootJar` no Spring Boot), `assemble`, `check`, `build`. `build` depende de `assemble` e `check`; `check` depende de `test`. Uma tarefa cujas entradas e saídas não mudaram é pulada (`UP-TO-DATE`) ou reaproveitada do *cache* (`FROM-CACHE`): é daí que vem boa parte da velocidade.
+- **`settings.gradle`**: `rootProject.name = 'loja'` e `include 'api', 'dominio'` (projetos multimódulo).
+- **Plugins**: declarados no bloco `plugins { ... }`. Os do núcleo (`java`, `java-library`, `application`) não precisam de versão; os externos (`org.springframework.boot`, `io.spring.dependency-management`) sim. No Gradle, as dependências do Spring Boot **sem versão** só funcionam porque o plugin `io.spring.dependency-management` (ou `platform(SpringBootPlugin.BOM_COORDINATES)`) importa o BOM.
+- **Catálogo de versões**: o arquivo `gradle/libs.versions.toml` (seções `[versions]`, `[libraries]`, `[plugins]`) centraliza versões e vira acessores tipados no build (`libs.mapstruct`).
+
+| | Maven | Gradle |
+| --- | --- | --- |
+| Configuração | XML declarativo (`pom.xml`) | DSL Groovy/Kotlin, que pode conter lógica |
+| Modelo | **fases** fixas com *goals* ligados a elas | **grafo de tarefas** personalizável |
+| Velocidade | build completo em geral | incremental, com *cache* e *daemon* |
+| Curva de aprendizado | menor, muito padronizado | maior, mais flexível |
+
+***Wrappers***: são arquivos **versionados no repositório** que baixam e usam a versão exata da ferramenta, sem exigir instalação na máquina.
+
+- **Maven Wrapper**: `mvnw`, `mvnw.cmd` e `.mvn/wrapper/maven-wrapper.properties` (guarda a `distributionUrl`). Gerar: `mvn wrapper:wrapper` (opcionalmente `-Dmaven=<versão>`).
+- **Gradle Wrapper**: `gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.properties` e `gradle-wrapper.jar`. Gerar ou atualizar: `./gradlew wrapper --gradle-version <versão>`.
+- Na primeira execução baixam a distribuição para o diretório do usuário (`~/.m2/wrapper`, `~/.gradle/wrapper`). **Sempre** use `./mvnw` / `./gradlew` no lugar de `mvn` / `gradle`, e **versione** os arquivos do *wrapper*. No Linux e no macOS o script precisa de permissão de execução (`chmod +x mvnw`).
+
+**Exemplo**:
+
+```xml
+<!-- pom.xml (trecho) -->
+<parent>                                                  <!-- herda BOM, versões de plugins e padrões -->
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-parent</artifactId>
+  <version>4.0.5</version>                                <!-- versão de exemplo: use a atual -->
+</parent>
+
+<groupId>com.exemplo</groupId>
+<artifactId>loja</artifactId>
+<version>1.0.0-SNAPSHOT</version>
+
+<properties>
+  <java.version>25</java.version>
+</properties>
+
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <exclusions>                                          <!-- remove uma transitiva... -->
+      <exclusion>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-logging</artifactId>
+      </exclusion>
+    </exclusions>
+  </dependency>
+  <dependency>                                            <!-- ...e coloca outra no lugar -->
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-log4j2</artifactId>
+  </dependency>
+</dependencies>
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-maven-plugin</artifactId>   <!-- gera o JAR executável -->
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-failsafe-plugin</artifactId>      <!-- executa os *IT na fase integration-test -->
+      <executions>
+        <execution>
+          <goals><goal>integration-test</goal><goal>verify</goal></goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+
+<profiles>
+  <profile>
+    <id>rapido</id>                                       <!-- ativado com: ./mvnw package -Prapido -->
+    <properties><skipTests>true</skipTests></properties>
+  </profile>
+</profiles>
+```
+
+```groovy
+// settings.gradle
+rootProject.name = 'loja'
+
+// build.gradle (trecho)
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.5'               // versões de exemplo
+    id 'io.spring.dependency-management' version '1.1.7'        // importa o BOM do Boot
+}
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'   // sem versão: vem do BOM
+    implementation libs.mapstruct                                       // vem do catálogo de versões
+}
+```
+
+```toml
+# gradle/libs.versions.toml
+[versions]
+mapstruct = "1.6.3"
+
+[libraries]
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+```
+
+```bash
+mvn wrapper:wrapper                      # gera mvnw, mvnw.cmd e .mvn/wrapper/ (uma vez; depois, commite)
+./mvnw clean verify                      # percorre as fases até verify: compila, testa e roda os *IT
+./mvnw spring-boot:run -Prapido          # chama um goal direto, com o perfil "rapido"
+./gradlew wrapper --gradle-version 9.0.0 # fixa/atualiza a versão do Gradle (exemplo)
+./gradlew build --info                   # executa o grafo de tarefas até "build"
+```
+
+**Explicação do exemplo**: o `<parent>` fornece o BOM e os padrões, então as dependências do Spring ficam **sem versão**. A exclusão troca o Logback pelo Log4j2 (remove a transitiva e declara a nova). O Failsafe liga seus *goals* à fase `integration-test`, e o perfil `rapido` só existe quando pedido com `-P`. No Gradle, o `settings.gradle` nomeia o projeto, o plugin `dependency-management` cumpre o papel do `parent` e o catálogo `libs.versions.toml` guarda a versão do MapStruct em um lugar só. Nos comandos, o `mvn wrapper:wrapper` é executado **uma vez** (com o Maven instalado) para criar o *wrapper*; depois disso, todos usam `./mvnw` e a versão do Maven vem do `maven-wrapper.properties`. (Os números de versão são ilustrativos: use sempre as atuais.)
+
 ## 5.5 Testes automatizados
 
 **O que é**: código que **verifica automaticamente** se o sistema se comporta como esperado, executado a cada mudança. Dá confiança para **refatorar** e funciona como **documentação executável** do comportamento.
@@ -2982,6 +3132,207 @@ class PedidoServiceTest {
 ```
 
 **Explicação do exemplo**: o `PedidoRepository` é substituído por um *mock* configurado para devolver `Optional.empty()`, de modo que o teste **não precisa de banco**. O `assertThrows` executa o código e exige que lance `NaoEncontradoException`; a exceção capturada permite conferir a mensagem. O `verify` garante que o serviço realmente consultou o repositório com o id esperado. O teste parametrizado executa o mesmo cenário três vezes, uma para cada idade da lista.
+
+### Aprofundamento: recursos avançados de JUnit 5 e Mockito, e testes de concorrência
+
+**O que é**: complemento do que foi visto acima: recursos do **JUnit 5** e do **Mockito** que resolvem situações comuns do dia a dia (tempo limite, repetição, ordem de chamadas, métodos estáticos) e a técnica para testar **código concorrente**, que é o tipo de teste mais difícil de escrever, porque o resultado depende da ordem em que as *threads* são escalonadas.
+
+**Para que serve**: escrever testes mais precisos (sem `Thread.sleep`, sem *mocks* demais) e **expor *race conditions*, *deadlocks* e atualizações perdidas** antes de irem para produção.
+
+**Como funciona**:
+
+**JUnit 5: recursos adicionais**
+
+- **Repetição e tempo**: `@RepeatedTest(100)` roda o mesmo teste várias vezes (útil para provocar falhas intermitentes de concorrência); `@Timeout(value = 2, unit = SECONDS)` falha o teste que demorar demais (detecta *deadlock* e laços infinitos); `assertTimeout` e `assertTimeoutPreemptively` fazem o mesmo para um trecho (a segunda **interrompe** a execução).
+- **Asserções extras**: `assertDoesNotThrow`, `assertIterableEquals`, `assertInstanceOf`, `assertSame`. **Suposições** (`Assumptions.assumeTrue`) **ignoram** o teste em vez de reprová-lo quando o ambiente não serve.
+- **Execução condicional**: `@EnabledOnOs`, `@EnabledOnJre`, `@EnabledIfEnvironmentVariable`.
+- **Fontes de dados** de `@ParameterizedTest`: `@NullAndEmptySource` (testa `null` e vazio), `@CsvFileSource` (arquivo CSV), `@MethodSource` (método que devolve `Stream<Arguments>`). `@TestFactory` gera **testes dinâmicos**.
+- **Ordem e instância**: `@TestMethodOrder` define a ordem, mas **testes não devem depender de ordem** (use só para organizar relatórios). `@TestInstance(PER_CLASS)` reaproveita a instância da classe entre os métodos. `TestInfo` injeta o nome do teste em execução.
+- **Extensões**: `@ExtendWith` aceita extensões próprias (`BeforeEachCallback`, `ParameterResolver`...), que é como o Mockito e o Spring se integram ao JUnit.
+- O **JUnit 6** mantém o pacote `org.junit.jupiter.api` e as anotações vistas aqui, então o conteúdo vale para as duas versões.
+
+**Mockito: recursos adicionais**
+
+- ***Stubbing* variado**: `thenReturn(a, b)` (respostas consecutivas), `thenThrow(...)`, `thenAnswer(inv -> ...)` (calcula a resposta a partir dos argumentos). Para métodos `void`: `doNothing()`, `doThrow(...)`.
+- ***Spy***: `@Spy` envolve um objeto **real**; para alterar um método do *spy*, use `doReturn(x).when(spy).metodo()` (a forma `when(spy.metodo())` chama o método real antes).
+- ***Matchers* (`any()`, `eq()`, `anyLong()`)**: se **um** argumento usa *matcher*, **todos** precisam usar (`verify(repo).salvar(eq("Ana"), any())`).
+- **Verificações**: `verify(m, never())`, `times(n)`, `atLeast(n)`, `verifyNoMoreInteractions(m)`, `verifyNoInteractions(m)`. **`InOrder`** confere a **ordem** das chamadas.
+- **Estilo BDD** (`BDDMockito`): `given(repo.findById(1L)).willReturn(...)` e `then(repo).should().save(any())` leem como *Given / When / Then*.
+- **Métodos estáticos e classes `final`**: a partir do **Mockito 5**, o *mock maker* **inline** é o padrão, então é possível mockar classes `final` e usar `mockStatic(Classe.class)` em um `try-with-resources` (o *mock* vale só dentro do bloco, na *thread* atual). Use com parcimônia: é sinal de que talvez falte uma abstração (tópico 6.1, inversão de dependência).
+- **Evite** mockar tipos que você não controla e objetos simples (`List`, *records*, objetos-valor): crie o objeto real.
+
+**Testes de concorrência**
+
+O problema: uma *race condition* pode aparecer em 1 de cada 10 mil execuções, e um teste que passa **não prova** que o código é seguro: só aumenta a confiança. As técnicas:
+
+- **Provocar a corrida**: várias *threads* (via `ExecutorService`) executam a mesma operação ao mesmo tempo, muitas vezes. Um **`CountDownLatch` de largada** faz todas esperarem o mesmo sinal para começar juntas (sem ele, a primeira termina antes de a segunda nascer e o conflito nunca ocorre).
+- **Afirmar uma invariante**, não um tempo: depois de `N` *threads* incrementarem `M` vezes, o total **tem** de ser `N * M`. Com um contador não seguro, o resultado vem menor e o teste falha; com `AtomicInteger` ou `synchronized`, passa.
+- **Propagar erros**: uma exceção lançada em outra *thread* **não** reprova o teste. Colete os `Future` e chame `get(timeout)`: ele relança como `ExecutionException`.
+- **Nunca sincronize com `Thread.sleep`**: é lento e frágil. Para esperar um resultado assíncrono, use `CountDownLatch`, `CompletableFuture.get(timeout)` ou a biblioteca **Awaitility** (`await().atMost(2, SECONDS).until(() -> fila.isEmpty())`).
+- **Repetir e limitar**: combine `@RepeatedTest` e `@Timeout` para pegar falhas raras e *deadlocks*.
+- **Em integração**: o mesmo padrão testa **bloqueio otimista** com banco real (duas *threads* alterando a mesma linha: uma deve falhar), conforme o tópico 5.6.
+- Para os mecanismos de sincronização do código que está sendo testado (`synchronized`, `volatile`, classes `Atomic*`, `Lock`), veja o tópico 4.5.
+
+**Exemplo**:
+
+```java
+class ContadorSeguro {
+    private final AtomicInteger valor = new AtomicInteger();
+    void incrementar() { valor.incrementAndGet(); }
+    int valor() { return valor.get(); }
+}
+
+class ContadorConcorrenteTest {
+
+    @RepeatedTest(5)
+    @Timeout(10)                                              // se travar (deadlock), reprova em 10 s
+    void naoPerdeIncrementosComVariasThreads() throws Exception {
+        int threads = 8, repeticoes = 10_000;
+        var contador = new ContadorSeguro();
+        var largada = new CountDownLatch(1);
+        var pool = Executors.newFixedThreadPool(threads);
+
+        List<Future<Void>> futuros = new ArrayList<>();
+        for (int i = 0; i < threads; i++) {
+            futuros.add(pool.submit(() -> {
+                largada.await();                              // todas esperam o mesmo sinal
+                for (int j = 0; j < repeticoes; j++) contador.incrementar();
+                return null;
+            }));
+        }
+        largada.countDown();                                  // libera todas ao mesmo tempo
+        for (Future<Void> f : futuros) f.get(5, TimeUnit.SECONDS);   // relança erros das threads
+        pool.shutdown();
+
+        assertEquals(threads * repeticoes, contador.valor());        // invariante: nada se perdeu
+    }
+}
+
+@ExtendWith(MockitoExtension.class)
+class TransferenciaServiceTest {
+    @Mock ContaRepository contas;
+    @Mock AuditoriaClient auditoria;
+    @InjectMocks TransferenciaService service;
+
+    @Test
+    void debitaAntesDeCreditarERegistraAuditoria() {
+        given(contas.findById(1L)).willReturn(Optional.of(new Conta(100)));   // BDD: given
+        given(contas.findById(2L)).willReturn(Optional.of(new Conta(0)));
+
+        service.transferir(1L, 2L, 30);                                       // when
+
+        InOrder ordem = inOrder(contas, auditoria);
+        ordem.verify(contas).findById(1L);                                    // then: a ordem importa
+        ordem.verify(contas).findById(2L);
+        ordem.verify(auditoria).registrar(eq("transferencia"), anyLong());    // matchers em TODOS os argumentos
+    }
+}
+```
+
+**Explicação do exemplo**: o primeiro teste cria 8 *threads* que ficam bloqueadas no `largada.await()`; o `countDown()` as libera juntas, o que maximiza a chance de conflito. O `f.get(5, SECONDS)` espera cada uma e **relança** qualquer exceção ocorrida nelas; no fim, a asserção confere que **todos os 80.000 incrementos** foram contados. Trocar `AtomicInteger` por um `int` comum faria o teste falhar de forma intermitente: é justamente para isso que ele é repetido 5 vezes e limitado a 10 segundos. O segundo teste usa o estilo BDD do Mockito e o `InOrder` para garantir a **ordem** das interações; como `registrar` recebe dois argumentos e um deles usa `eq`, o outro também precisa de *matcher* (`anyLong()`).
+
+## 5.6 Concorrência e transações com JPA (`@Version`)
+
+**O que é**: quando duas transações (de usuários ou *threads* diferentes) alteram **o mesmo registro** ao mesmo tempo, surge um **conflito de concorrência**. O ***lost update*** (atualização perdida) é o caso clássico: A e B leem o saldo 100; A grava 150; B grava 80 por cima e o depósito de A **some**, sem erro algum. O JPA oferece dois modelos de controle: o **otimista**, que assume que o conflito é raro e **detecta** a colisão no *commit* usando uma coluna de versão (`@Version`), e o **pessimista**, que **trava a linha** antes de alterá-la. Este tópico complementa o 5.1 (ACID e isolamento), o 5.3 (JPA) e o 7.6 (`@Transactional`).
+
+**Para que serve**: garantir a **consistência** dos dados sem serializar todo o sistema (travar tudo seria seguro, mas lento). A regra de ouro: o isolamento do banco **sozinho** nem sempre evita o *lost update* de um ciclo "ler, alterar em memória, gravar", e é por isso que o JPA fornece mecanismos próprios.
+
+**Como funciona**:
+
+**Controle otimista com `@Version`**
+
+- Um campo anotado com `@Version` (`int`, `long`, `Integer`, `Long`, `short` ou um *timestamp*) é **gerenciado pelo Hibernate**: começa em 0 e é **incrementado a cada `UPDATE`**. **Nunca o altere manualmente.**
+- O `UPDATE` gerado inclui a versão lida na condição: `update conta set saldo=?, versao=? where id=? and versao=?`. Se outra transação já mudou a linha, **nenhuma linha é afetada**, e o Hibernate lança `OptimisticLockException` (na API do JPA). No Spring Data, a exceção chega traduzida como **`ObjectOptimisticLockingFailureException`**.
+- **Sem bloqueio**: ninguém espera ninguém; o perdedor é avisado. Por isso escala bem quando o conflito é **raro** e a leitura predomina (cadastros, perfis, documentos).
+- **O que fazer ao detectar o conflito**: (a) responder **409 Conflict** ao cliente (via `@RestControllerAdvice`, tópico 7.5), para que ele recarregue e refaça a alteração; ou (b) **tentar de novo**, com **limite de tentativas** (um laço no chamador ou o Spring Retry com `@Retryable`). Cada tentativa precisa iniciar uma **nova transação**, relendo o dado atualizado.
+- **A versão tem de atravessar as requisições**: se o cliente leu a conta (versão 3), o servidor reabre a entidade pelo id (versão atual, digamos 4) e aplica a alteração, **o conflito não é detectado**, porque tudo ocorreu dentro de uma transação curta. Para proteger o ciclo "tela → servidor", **devolva a versão no DTO** e compare-a com a da entidade (ou use *ETag* / `If-Match`), recusando se forem diferentes.
+- **Atualizações em massa** (`@Modifying @Query("update ...")`) **não passam** pelo `@Version`: elas ignoram a coluna, a menos que você a incremente na consulta (`set versao = versao + 1`) ou use `update versioned` no HQL.
+- `@Version` nula indica entidade nova para o `save` do Spring Data (tópico 7.6). Para **forçar** o incremento sem alterar nenhum campo (por exemplo, quando só uma entidade filha mudou), use `LockModeType.OPTIMISTIC_FORCE_INCREMENT`.
+
+**Controle pessimista**
+
+- **`PESSIMISTIC_WRITE`** gera `SELECT ... FOR UPDATE`: a linha fica **travada** até o fim da transação, e quem tentar travá-la também **espera**. `PESSIMISTIC_READ` é um bloqueio compartilhado (outros podem ler, ninguém altera). Uso: `em.find(Conta.class, id, LockModeType.PESSIMISTIC_WRITE)` ou `@Lock(LockModeType.PESSIMISTIC_WRITE)` em um método do repositório Spring Data. **Exige transação ativa.**
+- O tempo máximo de espera se define com a dica `jakarta.persistence.lock.timeout` (`@QueryHints`); estourar gera `LockTimeoutException`/`PessimisticLockException`.
+- Riscos: **menos vazão** (as transações se enfileiram) e **deadlock** (A trava X e espera Y; B trava Y e espera X). Mitigação: travar sempre **na mesma ordem** (por exemplo, por id crescente), manter a transação **curta** e usar *timeout*.
+
+| | Otimista (`@Version`) | Pessimista (`FOR UPDATE`) |
+| --- | --- | --- |
+| Como detecta | compara a versão no `UPDATE` | trava a linha antes de lê-la |
+| Espera | não bloqueia; o perdedor **falha** | quem chega depois **espera** |
+| Custo | quase nulo se não há conflito; retentativa quando há | bloqueios sempre, risco de *deadlock* |
+| Quando usar | conflito raro, muita leitura | conflito frequente e falha cara (último item do estoque, saldo) |
+
+**Níveis de isolamento no Spring**: `@Transactional(isolation = Isolation.READ_COMMITTED)` (ou `REPEATABLE_READ`, `SERIALIZABLE`); `DEFAULT` usa o padrão do banco (tabela do tópico 5.1). Isolamento maior reduz anomalias e aumenta o risco de falhas por conflito, que a aplicação deve estar pronta para **repetir**.
+
+**Transações com JPA**
+
+- **Fronteira**: a transação deve envolver **uma unidade de negócio** completa, normalmente no método de serviço/caso de uso com `@Transactional`. Sem Spring, é manual: `em.getTransaction().begin()` ... `commit()`, com `rollback()` no `catch`. Para controle programático dentro do Spring existe o `TransactionTemplate`.
+- **Propagação** (`propagation`): `REQUIRED` (padrão: participa da transação existente ou cria uma), `REQUIRES_NEW` (**suspende** a atual e cria outra, com *commit* independente: serve para auditoria que deve persistir mesmo se a principal sofrer *rollback*), `MANDATORY` (exige transação já aberta, senão lança exceção), `SUPPORTS`, `NOT_SUPPORTED`, `NEVER` e `NESTED` (*savepoint*, depende do suporte do gerenciador de transações e do driver).
+- **Rollback**: por padrão só em exceções ***unchecked*** (`rollbackFor` para as *checked*). Duas armadilhas: **engolir a exceção** com `try/catch` dentro do método transacional faz o Spring **não ver o erro** e confirmar a transação; e, quando um método interno com `REQUIRED` lança exceção, a transação externa é marcada ***rollback-only***: mesmo que o chamador capture o erro, o *commit* final falha com `UnexpectedRollbackException`.
+- ***Flush* e *commit***: o `flush` envia o SQL ao banco **sem confirmar**. Conflitos de versão e violações de restrição costumam aparecer **só no *flush*/*commit***, isto é, **depois** que o corpo do método terminou, no proxy do Spring. Por isso um `try/catch` **dentro** do método não captura o `ObjectOptimisticLockingFailureException`: capture **fora** da fronteira transacional (no chamador) ou force o envio com `saveAndFlush`.
+- **Transações curtas**: não faça chamadas de rede (HTTP, e-mail) dentro da transação, pois ela mantém uma conexão do *pool* ocupada e pode segurar bloqueios. `readOnly = true` nas consultas.
+- **Uma transação por *thread***: o `EntityManager` **não é *thread-safe***, e entidades gerenciadas não devem ser compartilhadas entre *threads*. Um método `@Async` roda em **outra *thread* e outra transação** (a do chamador não se propaga; tópico 7.10).
+- **Defesa adicional no banco**: uma restrição **`UNIQUE`** (ou chave composta) impede duplicidades mesmo sob corrida (reserva do mesmo assento, e-mail duplicado); a aplicação trata o `DataIntegrityViolationException`. O bloqueio resolve atualizações; a restrição resolve a **criação** concorrente.
+
+**Exemplo**:
+
+```java
+@Entity
+public class Conta {
+    @Id @GeneratedValue private Long id;
+    private BigDecimal saldo = BigDecimal.ZERO;
+    @Version private Long versao;                         // controlada pelo Hibernate
+
+    protected Conta() {}
+    public void sacar(BigDecimal valor) {
+        if (saldo.compareTo(valor) < 0) throw new IllegalStateException("saldo insuficiente");
+        saldo = saldo.subtract(valor);
+    }
+    public Long getVersao() { return versao; }
+}
+
+public interface ContaRepository extends JpaRepository<Conta, Long> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)                 // SELECT ... FOR UPDATE (exige transação)
+    @Query("select c from Conta c where c.id = :id")
+    Optional<Conta> buscarParaAtualizar(@Param("id") Long id);
+}
+
+@Service
+class ContaService {
+    private final ContaRepository repo;
+    ContaService(ContaRepository repo) { this.repo = repo; }
+
+    @Transactional                                        // abordagem OTIMISTA
+    public void sacar(Long id, BigDecimal valor) {
+        Conta c = repo.findById(id).orElseThrow();        // lê com versao = N
+        c.sacar(valor);                                   // no commit: UPDATE ... WHERE id=? AND versao=N
+    }
+
+    @Transactional                                        // abordagem PESSIMISTA
+    public void sacarComTrava(Long id, BigDecimal valor) {
+        repo.buscarParaAtualizar(id).orElseThrow().sacar(valor);   // outras transações esperam aqui
+    }
+}
+
+@Service
+class SaqueFacade {                                       // SEM @Transactional: cada tentativa abre a sua
+    private final ContaService service;
+    SaqueFacade(ContaService service) { this.service = service; }
+
+    public void sacarComRetry(Long id, BigDecimal valor) {
+        for (int tentativa = 1; ; tentativa++) {
+            try {
+                service.sacar(id, valor);                 // passa pelo proxy: transação NOVA a cada chamada
+                return;
+            } catch (ObjectOptimisticLockingFailureException e) {   // lançada no commit, FORA do método
+                if (tentativa == 3) throw e;              // desiste após 3 tentativas
+            }
+        }
+    }
+}
+```
+
+**Explicação do exemplo**: em `sacar`, a entidade é lida com a versão atual e alterada em memória; o *dirty checking* gera, no *commit*, um `UPDATE` condicionado à versão lida. Se uma segunda transação alterou a conta no meio do caminho, o `UPDATE` não atinge nenhuma linha e o Hibernate lança a exceção de bloqueio otimista, **no *commit***. Por isso a captura fica em `SaqueFacade`, **fora** do método transacional, e **sem `@Transactional`**: cada chamada a `service.sacar` (via proxy) abre uma transação nova que relê a conta já atualizada. Em `sacarComTrava`, a abordagem pessimista usa `FOR UPDATE`: uma segunda transação que tente o mesmo saque **espera** a primeira terminar, sem falhar. Para provar o comportamento, use o teste de concorrência do tópico 5.5, com duas *threads* sacando da mesma conta.
 
 ---
 
@@ -3538,6 +3889,92 @@ class GlobalExceptionHandler {
 
 **Explicação do exemplo**: ao receber `POST /tasks` com `{"title":""}`, o `@Valid` rejeita o corpo **antes** de entrar no método (resposta **400**). Com um título válido, o Jackson converte o JSON em `CreateTaskRequest`, o caso de uso cria a tarefa e a resposta é **201 Created** com o cabeçalho `Location: /tasks/{id}`. No `GET /tasks/{id}`, se o caso de uso lançar `TaskNotFoundException`, o `@RestControllerAdvice` a captura e devolve **404** com a mensagem: o controller não tem `try/catch`.
 
+### Aprofundamento: OpenAPI e Swagger (documentação de APIs REST)
+
+**O que é**: **OpenAPI** é uma **especificação** (um documento JSON ou YAML) que descreve o **contrato** de uma API REST: caminhos, verbos, parâmetros, corpos de requisição e resposta, esquemas dos objetos, códigos de status e a segurança exigida. **Swagger** é o nome do conjunto de ferramentas criado em torno dela (e o antigo nome da especificação); a mais conhecida é a **Swagger UI**, uma página que lê o documento OpenAPI e exibe uma **documentação interativa**, na qual dá para **enviar requisições reais** (botão *Try it out*). No Spring, a biblioteca **springdoc-openapi** **gera o documento automaticamente**, inspecionando controllers, DTOs e validações.
+
+**Para que serve**: oferecer uma **fonte única de verdade** do contrato para front-end, QA e parceiros, testar a API manualmente sem escrever cliente, **gerar clientes e *stubs*** de servidor (OpenAPI Generator) e manter a documentação **sempre atualizada**, pois nasce do código (abordagem ***code-first***). A alternativa é ***contract-first***: escrever primeiro o YAML e gerar as interfaces a partir dele (bom para APIs públicas com várias equipes). **Evite** expor a Swagger UI em produção sem proteção.
+
+**Como funciona**:
+
+- **Dependência**: `springdoc-openapi-starter-webmvc-ui` (documento + Swagger UI; `-webmvc-api` traz só o documento; `-webflux-ui` para WebFlux). A série **2.x** do springdoc acompanha o Spring Boot 3; a série **3.x**, o Spring Boot 4. Sem nenhuma configuração, ficam disponíveis `/v3/api-docs` (JSON), `/v3/api-docs.yaml` e `/swagger-ui.html` (redireciona para `/swagger-ui/index.html`).
+- **O que é lido sozinho**: rotas e verbos dos controllers, tipos de parâmetros e de retorno, os **DTOs** (inclusive *records*) e as restrições do **Bean Validation** (`@NotBlank` vira `required`, `@Size` vira `minLength`/`maxLength`, `@Min`/`@Max`, `@Email` e `@Pattern` viram formato e limites). O `@ResponseStatus` dos métodos `@ExceptionHandler` de um `@RestControllerAdvice` também entra na documentação das respostas de erro.
+- **Anotações** (pacote `io.swagger.v3.oas.annotations`) para complementar o que o código não diz:
+  - `@Tag(name = "Tarefas")` agrupa os endpoints de um controller.
+  - `@Operation(summary = "...", description = "...")` descreve o endpoint.
+  - `@ApiResponse(responseCode = "404", description = "...")` (com `@ApiResponses`) documenta as respostas.
+  - `@Parameter(description = "...", example = "...")` descreve parâmetros.
+  - `@Schema(description = "...", example = "...", requiredMode = REQUIRED)` descreve campos e classes de DTO.
+  - `@Hidden` oculta um endpoint ou controller; `@Deprecated` marca como obsoleto.
+- **Informações gerais**: um *bean* `OpenAPI` define título, versão, descrição, contato, licença e servidores (`new OpenAPI().info(new Info().title("API da Loja").version("1.0"))`). `GroupedOpenApi` separa a documentação em grupos (por exemplo, `publica` e `admin`, filtrando por `pathsToMatch`).
+- **Propriedades úteis**: `springdoc.api-docs.path`, `springdoc.swagger-ui.path`, `springdoc.packages-to-scan`, `springdoc.paths-to-match`, `springdoc.swagger-ui.operations-sorter=method`. Para **desligar em produção**: `springdoc.api-docs.enabled=false` e `springdoc.swagger-ui.enabled=false` em um perfil (`application-prod`).
+- **Segurança**: declare o esquema com `@SecurityScheme` (por exemplo, `type = HTTP, scheme = "basic"`, ou `scheme = "bearer"` com `bearerFormat = "JWT"`) e exija-o nos endpoints com `@SecurityRequirement(name = "...")`. A Swagger UI mostra o botão **Authorize**, e as chamadas feitas por ela já levam o cabeçalho `Authorization`. Com o Spring Security (tópico 7.11), ou você libera `/v3/api-docs/**`, `/swagger-ui/**` e `/swagger-ui.html` com `permitAll()`, ou os mantém protegidos e usa o *Authorize*.
+- **Armadilhas**: documentar **entidades JPA** em vez de DTOs (expõe a estrutura interna); deixar `description`/`example` desatualizados (a documentação gerada acompanha o código, mas o texto das anotações não); e esquecer de documentar os **erros** (400, 401, 403, 404), que são justamente o que quem consome mais precisa saber.
+- **Relação com outras ferramentas**: o **Spring REST Docs** gera a documentação a partir dos **testes** (se a API mudar e o teste não, o build quebra); o springdoc gera a partir do **código**. Têm propósitos complementares.
+
+**Exemplo**:
+
+```xml
+<!-- pom.xml: Spring Boot 4 usa springdoc 3.x (Boot 3: série 2.x); versão de exemplo -->
+<dependency>
+  <groupId>org.springdoc</groupId>
+  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+  <version>3.0.3</version>
+</dependency>
+```
+
+```java
+@Configuration
+@SecurityScheme(name = "basicAuth", type = SecuritySchemeType.HTTP, scheme = "basic")
+class OpenApiConfig {
+    @Bean
+    OpenAPI apiInfo() {
+        return new OpenAPI().info(new Info()
+                .title("API de Tarefas")
+                .version("1.0")
+                .description("Gerencia tarefas de uma equipe"));
+    }
+}
+
+@Schema(description = "Dados para criar uma tarefa")
+public record CreateTaskRequest(
+        @Schema(description = "Título curto da tarefa", example = "Revisar o contrato")
+        @NotBlank @Size(min = 3, max = 100) String title,
+        @Schema(description = "Detalhes opcionais", example = "Enviar até sexta") String description) {}
+
+@RestController
+@RequestMapping("/tasks")
+@Tag(name = "Tarefas", description = "Operações sobre tarefas")
+@SecurityRequirement(name = "basicAuth")                       // exige o esquema declarado acima
+class TaskController {
+
+    @Operation(summary = "Cria uma tarefa", description = "Valida o título e devolve a tarefa criada")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Tarefa criada"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "401", description = "Não autenticado")
+    })
+    @PostMapping
+    ResponseEntity<TaskResponse> criar(@RequestBody @Valid CreateTaskRequest req) { /* ... */ return null; }
+
+    @Operation(summary = "Busca uma tarefa pelo id")
+    @ApiResponse(responseCode = "404", description = "Tarefa não encontrada")
+    @GetMapping("/{id}")
+    TaskResponse buscar(@Parameter(description = "Id da tarefa") @PathVariable UUID id) { /* ... */ return null; }
+}
+```
+
+```yaml
+# application-prod.yml: sem documentação exposta em produção
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+```
+
+**Explicação do exemplo**: só com a dependência, o springdoc já publica `/v3/api-docs` e a Swagger UI em `/swagger-ui.html`. A classe `OpenApiConfig` define o título e a versão e declara o esquema de segurança `basicAuth` (HTTP Basic, tópico 7.11); o `@SecurityRequirement` no controller faz a UI exibir o botão **Authorize** e enviar as credenciais nas chamadas. No *record*, `@NotBlank` e `@Size` aparecem **automaticamente** como campo obrigatório e limites de tamanho, e o `@Schema` acrescenta descrição e exemplo, que a UI usa para preencher o corpo do *Try it out*. As anotações `@Operation` e `@ApiResponse` descrevem o que o código sozinho não conta: o sentido de cada endpoint e os erros possíveis. Por fim, o perfil `prod` desliga o documento e a UI, para não expor o contrato da API publicamente.
+
 ## 7.6 Spring Data JPA
 
 **O que é**: módulo que **gera repositórios a partir de interfaces**, em cima de JPA/Hibernate. Você declara uma interface que estende um repositório base, e o Spring fornece a implementação em tempo de execução (por *proxy*).
@@ -3811,6 +4248,90 @@ class PropostaController {
 
 **Explicação do exemplo**: a cadeia libera só o endpoint de login e exige autenticação para todo o resto. A anotação `@PreAuthorize` restringe **este método** a quem tem o papel `INFLUENCER`: um usuário autenticado com outro papel recebe **403**. O `@AuthenticationPrincipal` entrega o usuário já autenticado, sem consultar o banco de novo. O `BCryptPasswordEncoder` é o *bean* usado pelo provedor para conferir senhas armazenadas como *hash*. (Neste exemplo, o CSRF está desligado porque se supõe uma API *stateless*; com sessão por cookie, não desligue.)
 
+### Aprofundamento: HTTP Basic, BCrypt e *roles* na prática
+
+**O que é**: complemento do fluxo de autenticação visto acima, com três peças que aparecem juntas em quase toda API de estudo ou serviço interno. O **HTTP Basic** é o esquema de autenticação **mais simples** do protocolo: o cliente envia, **em toda requisição**, o cabeçalho `Authorization: Basic <base64(usuario:senha)>`. O **BCrypt** é o algoritmo de ***hash*** usado para guardar as senhas. As ***roles*** (papéis) definem **o que** cada usuário autenticado pode fazer.
+
+**Para que serve**: proteger APIs simples, protótipos, ferramentas internas e a comunicação entre serviços de uma rede confiável, e entender a base antes de partir para JWT/OAuth2. **Limitações do Basic**: a credencial viaja a cada requisição; o Base64 **não é criptografia** (qualquer um decodifica), então só é aceitável com **HTTPS**; não há expiração nem *logout*; e o cliente precisa guardar a senha. Para usuários finais em produção, prefira token (JWT/OAuth2).
+
+**Como funciona**:
+
+**Fluxo do HTTP Basic**
+
+1. O cliente chama um endpoint protegido **sem** credenciais.
+2. O servidor responde **401** com o cabeçalho `WWW-Authenticate: Basic realm="..."`, que diz ao cliente (e ao navegador, que abre uma caixa de login) qual esquema usar.
+3. O cliente repete a chamada com `Authorization: Basic dXN1YXJpbzpzZW5oYQ==` (Base64 de `usuario:senha`).
+4. No Spring, o **`BasicAuthenticationFilter`** extrai o cabeçalho, monta o `Authentication` e o entrega ao `AuthenticationManager`: daí em diante é o **mesmo fluxo** do tópico acima (`UserDetailsService` + `PasswordEncoder`). Se falhar, o `BasicAuthenticationEntryPoint` responde **401**.
+
+Habilita-se com `.httpBasic(Customizer.withDefaults())`. Como a credencial vai a cada requisição, a API pode ser ***stateless*** (`SessionCreationPolicy.STATELESS`). Cuidado: o **navegador guarda** as credenciais Basic e as reenvia sozinho, o que reabre o risco de **CSRF**; só desligue o CSRF se os clientes **não** forem navegadores. Para testar: `curl -u ana:senha123 ...`, o Postman (aba *Authorization*) ou o botão *Authorize* da Swagger UI (tópico 7.5).
+
+**Usuários**: o `InMemoryUserDetailsManager` guarda usuários em memória (**só para estudo e desenvolvimento**). Em produção, implemente um `UserDetailsService` que carregue do banco (por exemplo, um `UsuarioRepository`) e converta a entidade em `UserDetails` (`User.withUsername(...).password(hash).roles(...)`). `User.withDefaultPasswordEncoder()` é **descontinuado** e **não** serve para produção.
+
+**BCrypt em detalhe**
+
+- É um *hash* **adaptativo e de mão única**: não há como "descriptografar"; a conferência refaz o cálculo. Por isso se usa `encoder.matches(senhaDigitada, hashGuardado)`, **nunca** `equals` entre *hashes*.
+- O resultado tem o formato `$2a$10$<22 caracteres de salt><31 de hash>` (**60 caracteres**): a **versão**, o **custo** (*strength*) e o ***salt*** ficam **dentro** do próprio texto, então **não há coluna separada para o salt** (a coluna da senha deve comportar 60+ caracteres).
+- O ***salt* é aleatório**: a mesma senha gera **hashes diferentes** a cada `encode`, o que impede o uso de tabelas pré-calculadas (*rainbow tables*).
+- O **custo** (4 a 31, padrão 10 no Spring) define o trabalho como 2^custo iterações: **cada +1 dobra o tempo**. Ajuste para que um *hash* leve uma fração de segundo no seu servidor, lento o bastante para frustrar força bruta e rápido o bastante para o login não pesar.
+- Limite conhecido: só os **primeiros 72 bytes** da senha são considerados. Alternativas modernas: `Argon2PasswordEncoder`, `SCryptPasswordEncoder`, `Pbkdf2PasswordEncoder`; o `DelegatingPasswordEncoder` (prefixo `{bcrypt}`) permite trocar de algoritmo sem invalidar as senhas antigas.
+- **Onde codificar**: ao **cadastrar ou trocar** a senha (`usuario.setSenha(encoder.encode(dto.senha()))`); na autenticação o provedor chama `matches` sozinho. Nunca registre a senha em log nem devolva o *hash* em DTOs.
+
+***Roles* x *authorities***
+
+- Uma ***authority*** é uma permissão (`proposal:write`); uma ***role*** é um **papel** que agrupa permissões (`ADMIN`, `USER`). Para o Spring, ambos são `GrantedAuthority`; a *role* é só uma *authority* com prefixo: `roles("ADMIN")` guarda `ROLE_ADMIN`, e `hasRole("ADMIN")` equivale a `hasAuthority("ROLE_ADMIN")`.
+- Regras por URL: `hasRole`, `hasAnyRole("ADMIN", "GERENTE")`, `hasAuthority`, `authenticated()`, `permitAll()`. **A ordem importa**: vale a **primeira** regra que casa, então escreva as **mais específicas antes** das gerais e deixe `anyRequest()` por último.
+- Quando um papel deve herdar o outro (`ADMIN` pode tudo que `USER` pode), use uma **hierarquia de papéis** (`RoleHierarchy`) em vez de repetir `hasAnyRole` em cada regra.
+- Com o Basic ativo: credencial ausente ou errada → **401** (com `WWW-Authenticate`); autenticado, mas sem o papel → **403**.
+- Testes: `@WithMockUser(roles = "ADMIN")` pula a autenticação; `SecurityMockMvcRequestPostProcessors.httpBasic("ana", "senha123")` exercita o filtro de verdade.
+
+**Exemplo**:
+
+```java
+@Configuration
+@EnableWebSecurity
+class BasicSecurityConfig {
+
+    @Bean
+    SecurityFilterChain api(HttpSecurity http) throws Exception {
+        return http
+            .csrf(AbstractHttpConfigurer::disable)                         // API stateless, sem navegador
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(a -> a
+                .requestMatchers(HttpMethod.GET, "/api/produtos/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/produtos/**").hasRole("ADMIN")      // demais verbos: só ADMIN
+                .anyRequest().authenticated())                             // negar por padrão
+            .httpBasic(Customizer.withDefaults())
+            .build();
+    }
+
+    @Bean PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }   // custo padrão 10
+
+    @Bean
+    UserDetailsService usuarios(PasswordEncoder encoder) {                 // só para estudo/desenvolvimento
+        UserDetails ana = User.withUsername("ana")
+                .password(encoder.encode("senha123")).roles("USER").build();
+        UserDetails admin = User.withUsername("admin")
+                .password(encoder.encode("admin123")).roles("ADMIN").build();
+        return new InMemoryUserDetailsManager(ana, admin);
+    }
+}
+
+// Comportamento do BCrypt
+var encoder = new BCryptPasswordEncoder(12);          // custo 12 (4x mais lento que o 10)
+String h1 = encoder.encode("senha123");               // $2a$12$... (60 caracteres)
+String h2 = encoder.encode("senha123");               // diferente de h1: salt aleatório
+boolean ok = encoder.matches("senha123", h1);         // true: o salt e o custo estão dentro de h1
+```
+
+```bash
+curl -i http://localhost:8080/api/produtos                              # 401 + WWW-Authenticate: Basic realm="Realm"
+curl -u ana:senha123 http://localhost:8080/api/produtos                 # 200 (USER pode listar)
+curl -u ana:senha123 -X DELETE http://localhost:8080/api/produtos/1     # 403 (autenticada, mas USER não é ADMIN)
+curl -u admin:admin123 -X DELETE http://localhost:8080/api/produtos/1   # 204 (ADMIN pode)
+```
+
+**Explicação do exemplo**: a cadeia exige autenticação em tudo e usa o HTTP Basic sem sessão. A primeira regra libera a **leitura** para `USER` e `ADMIN`; a segunda, mais geral, restringe os **demais verbos** ao `ADMIN` (a ordem importa: invertendo, o `GET` do `USER` cairia na regra do `ADMIN`). O `UserDetailsService` em memória guarda apenas **hashes BCrypt**, nunca as senhas em texto puro. Nos `curl`, a primeira chamada sem credenciais recebe **401** e o desafio `WWW-Authenticate`; a de `ana` passa na leitura, mas é barrada no `DELETE` com **403**, porque está autenticada e não tem o papel exigido; o `admin` completa a operação. No bloco do BCrypt, `h1` e `h2` diferem por causa do *salt* aleatório, e mesmo assim `matches` valida: a versão, o custo e o *salt* estão no próprio *hash*. (Usuários e senhas fixos no código são só para estudo.)
+
 ## 7.12 Spring Cloud OpenFeign e resiliência
 
 **O que é**: o **OpenFeign** é um **cliente HTTP declarativo**: você descreve o contrato de uma API externa em uma **interface**, com as mesmas anotações do Spring MVC, e o framework gera a **implementação** (por proxy). Evita montar URLs, serializar/desserializar JSON e tratar erros à mão com `RestTemplate`/`WebClient`. (O Spring Cloud OpenFeign está em modo de manutenção; a alternativa nativa são as interfaces `@HttpExchange` com `RestClient`. Verifique o status atual.)
@@ -3913,6 +4434,78 @@ class ClienteRepositoryTest {
 
 **Explicação do exemplo**: o primeiro teste sobe **só a camada web** e usa `MockMvc` para simular um `POST` com título vazio, verificando o **400** da validação, sem servidor, banco ou caso de uso real (substituído pelo `@MockitoBean`). O segundo sobe **só o JPA** com banco em memória, salva um cliente e confirma a consulta derivada `existsByEmail`; ao final, a transação é desfeita, deixando o banco limpo para o próximo teste.
 
+### Aprofundamento: testes de integração com Testcontainers
+
+**O que é**: o **Testcontainers** é uma biblioteca Java que, durante o teste, **sobe contêineres Docker descartáveis** (banco de dados, Redis, Kafka...) e os remove ao final. Um **teste de integração** exercita **várias peças reais juntas** (controller, serviço, repositório e banco), em oposição ao teste unitário, que isola uma classe com dublês. O Testcontainers permite que essa integração use o **mesmo tipo de banco da produção**, sem instalar nada na máquina.
+
+**Para que serve**: eliminar a diferença entre "o teste passou no H2" e "falhou no MySQL/PostgreSQL" (dialeto SQL, tipos, funções, travas e `@Version` se comportam diferente), testar migrações (Flyway/Liquibase) e consultas nativas de verdade e garantir que o ambiente de teste seja **reprodutível** na máquina de qualquer pessoa e no CI. Requer **Docker** (ou um motor compatível) em execução; o custo é o **tempo de subida** do contêiner.
+
+**Como funciona**:
+
+- **Ciclo com JUnit 5**: `@Testcontainers` (extensão) + `@Container` em um campo. Campo **`static`** = **um contêiner por classe** de teste (o usual, mais rápido); campo de **instância** = um contêiner **por método**. O contêiner expõe uma **porta aleatória** no *host* (evita conflito com um banco local): use `getJdbcUrl()`, `getMappedPort(...)`, nunca uma porta fixa. Uma ***wait strategy*** espera o serviço ficar pronto antes de o teste começar. O contêiner auxiliar **Ryuk** remove contêineres órfãos se o teste for interrompido.
+- **Testcontainers 2.x**: o suporte ao JUnit 4 foi removido; os artefatos passaram a ter o prefixo `testcontainers-` (`testcontainers-junit-jupiter`, `testcontainers-mysql`, `testcontainers-postgresql`); as classes dos módulos mudaram de pacote (`org.testcontainers.mysql.MySQLContainer`, no lugar de `org.testcontainers.containers.MySQLContainer<?>` da série 1.x) e **deixaram de ser genéricas**. As classes centrais (`GenericContainer`, `Network`) continuam em `org.testcontainers.containers`. As versões vêm do BOM do Spring Boot (Boot 4 usa a série 2.x; Boot 3, a 1.x).
+- **Integração com o Spring Boot**: **`@ServiceConnection`** (Boot 3.1+) em um campo `@Container` configura automaticamente a conexão (URL, usuário, senha) do `DataSource` a partir do contêiner, sem propriedades. A alternativa manual é `@DynamicPropertySource` (registra `spring.datasource.url` etc. dinamicamente). O *starter* `spring-boot-testcontainers` traz o suporte.
+- **Qual teste usar**: `@DataJpaTest` + `@AutoConfigureTestDatabase(replace = NONE)` para a **camada de persistência** (rápido); `@SpringBootTest` (com `RANDOM_PORT` e `TestRestTemplate`) para o **fluxo completo**, da requisição HTTP ao banco.
+- **Velocidade**: subir um contêiner por classe é lento. Use **contêineres *singleton*** (iniciados uma vez e compartilhados entre as classes, por exemplo em uma classe base ou `@TestConfiguration`) e `withReuse(true)` (reaproveita contêineres entre execuções locais, se habilitado em `~/.testcontainers.properties`). O Spring também reaproveita o contexto entre classes com a mesma configuração (tópico 7.13).
+- **Isolamento dos dados**: `@Transactional` em um teste de `@DataJpaTest` faz *rollback* ao final. Mas em `@SpringBootTest` com `RANDOM_PORT`, o servidor roda em **outra *thread***, então o *rollback* do teste **não alcança** o que a requisição gravou: limpe os dados em `@BeforeEach` (`repo.deleteAll()`) ou com `@Sql`. Nunca dependa da **ordem** dos testes.
+- **Esquema do banco**: use as **mesmas migrações** (Flyway/Liquibase) do ambiente real em vez de `create-drop`, para testar o esquema verdadeiro.
+- **Concorrência**: um contêiner com banco real é o jeito certo de testar `@Version` e travas (tópico 5.6): duas *threads* alterando a mesma linha (técnica do tópico 5.5).
+- **Outros serviços**: `GenericContainer` sobe **qualquer imagem** (Redis, RabbitMQ, uma API simulada); `ComposeContainer` sobe um `compose.yaml` inteiro; há módulos para Kafka, MongoDB, Elasticsearch e outros.
+- **Convenção**: classes de integração terminam em `*IT` e rodam no Failsafe (tópico 5.4), separadas dos testes unitários rápidos.
+
+**Exemplo**:
+
+```xml
+<!-- pom.xml (trecho): Testcontainers 2.x; as versões vêm do BOM do Spring Boot 4 -->
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-testcontainers</artifactId>
+  <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>org.testcontainers</groupId>
+  <artifactId>testcontainers-junit-jupiter</artifactId>
+  <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>org.testcontainers</groupId>
+  <artifactId>testcontainers-mysql</artifactId>
+  <scope>test</scope>
+</dependency>
+```
+
+```java
+@SpringBootTest
+@Testcontainers
+class PedidoRepositoryIT {
+
+    @Container
+    @ServiceConnection                                          // liga o contêiner ao DataSource do Spring
+    static MySQLContainer mysql = new MySQLContainer("mysql:8.4");   // 2.x: sem genérico; 1.x: MySQLContainer<?>
+
+    @Autowired PedidoRepository repo;
+
+    @BeforeEach
+    void limpar() { repo.deleteAll(); }                         // isolamento entre os testes
+
+    @Test
+    void deveSalvarEBuscarPorCliente() {
+        repo.save(new Pedido("Ana"));
+
+        assertEquals(1, repo.findByCliente("Ana").size());
+    }
+
+    @Test
+    void naoPermiteDoisPedidosComOMesmoNumero() {
+        repo.saveAndFlush(new Pedido("Ana", 1001));
+        assertThrows(DataIntegrityViolationException.class,
+                () -> repo.saveAndFlush(new Pedido("Bia", 1001)));   // UNIQUE do banco real
+    }
+}
+```
+
+**Explicação do exemplo**: o campo `static` com `@Container` faz o MySQL **subir uma vez** para a classe inteira, e o `@ServiceConnection` registra automaticamente a URL e as credenciais no `DataSource`, sem nenhuma propriedade no teste. O `@BeforeEach` esvazia a tabela, de modo que um teste não enxerga os dados do outro. O segundo teste (que supõe um campo `numero` mapeado com `@Column(unique = true)`) só faz sentido com o **banco real**: a violação da restrição `UNIQUE` vem do MySQL e se traduz em `DataIntegrityViolationException`; o `saveAndFlush` envia o SQL na hora (sem ele, o erro só apareceria no *commit*). Com H2, esse mesmo teste poderia passar ou falhar por motivos diferentes dos de produção. (Para Spring Boot 3 / Testcontainers 1.x, troque os artefatos por `junit-jupiter` e `mysql` e importe `org.testcontainers.containers.MySQLContainer`.)
+
 ## 7.14 Observabilidade, empacotamento e execução
 
 **O que é**: **observabilidade** é a capacidade de entender **o que a aplicação está fazendo em produção** a partir do que ela emite. As três bases: **logs** (eventos), **métricas** (números ao longo do tempo) e **traces** (o caminho de uma requisição por vários serviços). **Empacotamento e execução** tratam de entregar a aplicação de forma reprodutível (JAR, contêiner).
@@ -3960,6 +4553,376 @@ services:
 
 **Explicação do exemplo**: o primeiro trecho expõe só quatro endpoints do Actuator e mostra os detalhes da saúde apenas para usuários autorizados. Com isso, o Prometheus pode coletar `/actuator/prometheus` e o orquestrador pode consultar `/actuator/health`. No `compose.yml`, a aplicação só inicia depois que o *healthcheck* do banco passa, evitando erros de conexão na partida. (As credenciais `root/root` são só para desenvolvimento local.)
 
+### Aprofundamento: logs, métricas e *traces* com Actuator, Micrometer, Prometheus e Grafana
+
+**O que é**: detalhamento da observabilidade vista acima. Cada ferramenta tem um papel em uma cadeia: o **Actuator** expõe a aplicação para operação; o **Micrometer** **coleta e padroniza** as métricas; o **Prometheus** **armazena** as métricas como séries temporais; o **Grafana** as **exibe** em painéis e dispara alertas. Os três "pilares" são complementares, não concorrentes.
+
+**Para que serve**: descobrir **que** algo está errado (antes do usuário reclamar), **onde** está o gargalo e **por que** aconteceu. A regra prática: a **métrica avisa**, o ***trace* localiza** e o **log explica**.
+
+**Como funciona**:
+
+| Pilar | Responde | Formato | Volume e custo | Exemplo |
+| --- | --- | --- | --- | --- |
+| **Logs** | *O que aconteceu* (evento detalhado) | texto ou JSON com data, nível, mensagem | alto (um por evento) | `Pedido 42 rejeitado: estoque insuficiente` |
+| **Métricas** | *Quanto, com que frequência, quão rápido* (agregados numéricos no tempo) | séries temporais: nome + *tags* + valor | baixo e previsível | 95% das requisições em menos de 0,8 s |
+| ***Traces*** | *Por onde a requisição passou e onde demorou* | árvore de ***spans*** ligados por um `traceId` | médio (usa amostragem) | requisição → API → serviço de pagamento → banco |
+
+Para investigar um problema, o caminho típico é: o alerta de uma **métrica** (taxa de erros subiu) → o ***trace*** de uma requisição lenta (a chamada ao pagamento demorou 4 s) → os **logs** daquele `traceId` (o motivo do erro). Por isso se coloca o `traceId` em cada linha de log (via MDC); o Spring Boot faz isso sozinho quando há *tracing* configurado, e o padrão de log passa a mostrar algo como `INFO [loja,6f2c9a...,a1b2c3...] Pedido criado`.
+
+**Actuator em detalhe** (dependência `spring-boot-starter-actuator`)
+
+- Por padrão, **só o `health`** fica exposto por HTTP; os demais são liberados em `management.endpoints.web.exposure.include`.
+- `/actuator/health`: agrega os ***health indicators*** (banco, disco, Redis...). Para um indicador próprio, crie um *bean* que implemente `HealthIndicator`. Com `management.endpoint.health.probes.enabled=true` (ativado sozinho no Kubernetes) surgem `/actuator/health/liveness` e `/actuator/health/readiness`.
+- `/actuator/metrics` e `/actuator/metrics/{nome}`: lista e detalha as métricas; `/actuator/info` (use o *goal* `build-info` do plugin do Boot para mostrar versão e data do build); `/actuator/loggers`: **altera o nível de log em execução** (`POST` com `{"configuredLevel":"DEBUG"}`), sem reiniciar.
+- **Segurança**: os endpoints vazam informação (`env`, `heapdump`, `beans`). Exponha só o necessário, proteja-os com o Spring Security (`EndpointRequest.toAnyEndpoint()`) e, se possível, mova-os para outra porta com `management.server.port`, que **não** é publicada na internet.
+
+**Micrometer**
+
+- É uma **fachada** (como o SLF4J): o código registra métricas no `MeterRegistry` e um módulo converte para o formato do sistema escolhido (Prometheus, Datadog, CloudWatch...).
+- **Tipos**: `Counter` (só **cresce**: pedidos criados, erros), `Gauge` (valor que **sobe e desce**: itens na fila, conexões ativas), `Timer` (**duração + contagem**; permite histograma e percentis), `DistributionSummary` (distribuição de tamanhos, como o do *payload*). As anotações `@Timed` e `@Counted` funcionam com os respectivos *aspects* registrados.
+- ***Tags*** (dimensões) permitem filtrar e agrupar (`status`, `metodo`, `canal`). **Cuidado com a cardinalidade**: cada combinação de valores de *tags* cria uma **série nova**. Use valores de **poucas opções** (`canal=api`); **nunca** o id do usuário, o e-mail ou a URL com id, pois isso explode o consumo de memória do Prometheus.
+- **Métricas automáticas**: JVM (memória, GC, *threads*), CPU, requisições HTTP do servidor (`http.server.requests`), *pool* de conexões (HikariCP), Tomcat, cache e Logback.
+- **Configuração comum**: `management.metrics.tags.application=${spring.application.name}` (rotula todas as métricas) e `management.metrics.distribution.percentiles-histogram.http.server.requests=true` (histograma, necessário para calcular percentis no Prometheus).
+- **Nomes**: o ponto vira *underscore* e o tipo vira sufixo: `http.server.requests` → `http_server_requests_seconds_count`, `_sum` e `_bucket`; um contador `pedidos.criados` → `pedidos_criados_total`.
+
+**Prometheus**
+
+- Banco de **séries temporais** com modelo ***pull***: ele mesmo **consulta** (*scrape*) o endpoint `/actuator/prometheus` de cada instância, a cada intervalo (por exemplo, 15 s). Exige a dependência `micrometer-registry-prometheus` e o endpoint `prometheus` exposto. Isso facilita saber se uma instância caiu: a métrica `up` vira 0.
+- Configurado em `prometheus.yml` (alvos, intervalo). Dentro do Docker Compose, o alvo é o **nome do serviço** (`app:8080`), não `localhost` (tópico 7.15).
+- Consultas em **PromQL**: `rate(http_server_requests_seconds_count[5m])` (requisições por segundo, nos últimos 5 min), `sum by (status) (rate(...))` (por código de status) e `histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket[5m])))` (latência no percentil 95). Alertas são regras do Prometheus enviadas ao **Alertmanager** (ou configuradas no próprio Grafana).
+
+**Grafana**
+
+- Ferramenta de **visualização** (porta `3000`). Conecta-se a uma **fonte de dados** (*data source*), aqui o Prometheus (`http://prometheus:9090`), e monta **painéis** (*dashboards*) com gráficos de consultas PromQL, variáveis (escolher a instância) e **alertas**.
+- Há painéis prontos da comunidade para JVM/Micrometer e Spring Boot, que podem ser importados. Em ambientes automatizados, fontes de dados e painéis são carregados por **arquivos de *provisioning***, sem cliques.
+- **Boas práticas**: acompanhe os **quatro sinais de ouro** (latência, tráfego, erros e saturação); alerte sobre **sintomas** que afetam o usuário (taxa de erros, latência alta), não sobre cada causa possível; e **não registre dados sensíveis** em logs, *tags* ou endpoints.
+
+***Traces* distribuídos**
+
+- Um ***trace*** é a jornada completa de uma requisição; cada etapa (chamada HTTP, consulta SQL) é um ***span*** com início, duração e *tags*. O `traceId` é o mesmo em todos os serviços; cada *span* tem seu `spanId` e referência ao pai.
+- A **propagação de contexto** ocorre por cabeçalhos HTTP (padrão W3C `traceparent`). No Spring: **Micrometer Tracing** (fachada) + a ponte para o **OpenTelemetry** (`micrometer-tracing-bridge-otel`) + um exportador (`opentelemetry-exporter-otlp`), enviando para **Jaeger**, **Tempo** ou **Zipkin**.
+- `management.tracing.sampling.probability`: fração das requisições registradas (o padrão é 0,1, ou seja, 10%; use `1.0` em desenvolvimento). Clientes HTTP precisam ser criados a partir dos *builders* do Spring (`RestClient.Builder`, `WebClient.Builder`) para **propagar** o contexto automaticamente.
+
+**Exemplo**:
+
+```xml
+<!-- pom.xml (trecho) -->
+<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId></dependency>
+<dependency><groupId>io.micrometer</groupId><artifactId>micrometer-registry-prometheus</artifactId></dependency>
+```
+
+```yaml
+# application.yml (trecho)
+spring:
+  application:
+    name: loja
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}          # rótulo comum em todas as métricas
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true                     # permite calcular p95/p99 no Prometheus
+  tracing:
+    sampling:
+      probability: 1.0                                 # em produção, use um valor menor
+```
+
+```java
+@Service
+class PedidoService {
+    private final PedidoRepository repo;
+    private final Counter pedidosCriados;
+    private final Timer tempoDeCriacao;
+
+    PedidoService(PedidoRepository repo, MeterRegistry registry) {
+        this.repo = repo;
+        this.pedidosCriados = Counter.builder("pedidos.criados")
+                .description("Total de pedidos criados")
+                .tag("canal", "api")                       // tag de cardinalidade baixa
+                .register(registry);
+        this.tempoDeCriacao = Timer.builder("pedidos.criacao.tempo")
+                .publishPercentileHistogram()
+                .register(registry);
+    }
+
+    @Transactional
+    public Pedido criar(String cliente) {
+        return tempoDeCriacao.record(() -> {              // mede o tempo do trecho
+            Pedido p = repo.save(new Pedido(cliente));
+            pedidosCriados.increment();                    // conta o evento de negócio
+            return p;
+        });
+    }
+}
+```
+
+```yaml
+# prometheus.yml
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: loja
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["app:8080"]                           # nome do serviço no Compose
+```
+
+```yaml
+# compose.yml (trecho): ao lado dos serviços db e app do tópico anterior
+  prometheus:
+    image: prom/prometheus:v3.5.0                       # versão de exemplo; evite "latest"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+  grafana:
+    image: grafana/grafana:12.1.0                       # versão de exemplo
+    ports: ["3000:3000"]
+    depends_on: [prometheus]
+```
+
+**Explicação do exemplo**: o Actuator publica `/actuator/prometheus` e o Micrometer rotula tudo com `application=loja`. No serviço, o `Counter` e o `Timer` viram as métricas `pedidos_criados_total` e `pedidos_criacao_tempo_seconds_*`, sem nenhum código específico do Prometheus (a fachada cuida da conversão). A *tag* `canal` tem um único valor possível, portanto não gera explosão de séries. O `prometheus.yml` manda coletar o endpoint do serviço `app` a cada 15 s (dentro da rede do Compose, o nome do serviço é o endereço). No Grafana, basta cadastrar o Prometheus (`http://prometheus:9090`) como fonte de dados e criar os painéis com PromQL, por exemplo `rate(pedidos_criados_total[5m])`. (As versões das imagens são ilustrativas.)
+
+## 7.15 Docker e Docker Compose
+
+**O que é**: o **Docker** é uma plataforma para empacotar e executar aplicações em **contêineres**: processos **isolados** (pelo kernel do Linux) que carregam a aplicação **e tudo de que ela precisa** (JRE, bibliotecas, configuração), compartilhando o kernel do computador hospedeiro. Diferem das **máquinas virtuais**, que trazem um sistema operacional inteiro e por isso são maiores e mais lentas para iniciar. Os conceitos centrais:
+
+- **Imagem**: o **modelo imutável** (somente leitura) da aplicação, formado por **camadas** empilhadas e identificado por `nome:tag` (por exemplo, `mysql:8.4`).
+- **Contêiner**: uma **instância em execução** de uma imagem, com uma camada gravável **efêmera** por cima. A relação é a de **classe e objeto**: uma imagem gera vários contêineres.
+- ***Registry***: onde as imagens são publicadas e baixadas (Docker Hub, GitHub Container Registry, Amazon ECR).
+- ***Dockerfile***: a **receita** que descreve como construir uma imagem.
+- **Docker Compose**: ferramenta que descreve e sobe **vários contêineres** (aplicação, banco, cache...) com um único arquivo YAML.
+
+**Para que serve**: acabar com o "funciona na minha máquina" (o mesmo ambiente em desenvolvimento, CI e produção), **subir dependências** (MySQL, Redis, Prometheus) com um comando, isolar aplicações entre si, implantar de forma portável (em servidores, Kubernetes, nuvem) e rodar testes de integração com contêineres descartáveis (tópico 7.13). **Evite** guardar dados importantes na camada gravável do contêiner (veja volumes).
+
+**Como funciona**:
+
+**Comandos essenciais**
+
+```bash
+docker build -t loja:1.0 .                    # constrói a imagem a partir do Dockerfile do diretório atual
+docker run -d --name loja -p 8080:8080 loja:1.0   # cria e inicia um contêiner (-d: em segundo plano)
+docker ps                                     # contêineres em execução (-a: todos)
+docker logs -f loja                           # acompanha os logs
+docker exec -it loja sh                       # abre um terminal dentro do contêiner
+docker stop loja && docker rm loja            # para e remove o contêiner
+docker images                                 # imagens locais
+```
+
+`-p 8080:8080` **publica** a porta (`host:contêiner`); `-e NOME=valor` define variável de ambiente; `--rm` remove o contêiner ao terminar.
+
+**Dockerfile**: cada instrução cria uma **camada**, guardada em *cache*.
+
+- `FROM` (imagem base), `WORKDIR`, `COPY`, `RUN` (executa na **construção**), `ENV`/`ARG`, `EXPOSE` (só documenta a porta; **não** publica), `USER` e `ENTRYPOINT`/`CMD` (o que roda ao **iniciar**). Prefira a forma **exec** (`["java", "-jar", "app.jar"]`): o processo Java recebe os sinais do Docker e pode encerrar com *graceful shutdown*.
+- **Ordem das instruções**: do que **muda menos** para o que muda **mais**. Copie e baixe as dependências antes do código, pois assim a camada pesada de dependências é reaproveitada do *cache* quando só o código muda.
+- ***Multi-stage build***: um estágio com **JDK e Maven/Gradle** compila, e o estágio final contém só o **JRE e o JAR**. A imagem fica menor e mais segura (sem compilador nem código-fonte).
+- `.dockerignore` (`target/`, `.git`) evita enviar arquivos inúteis ao *build*. Rode como **usuário não *root***, use **tags fixas** (nunca `latest`) e, na JVM, `-XX:MaxRAMPercentage` para respeitar o limite de memória do contêiner.
+- Alternativas sem Dockerfile: o plugin **Jib** (tópico 5.4) e os ***buildpacks*** do Spring Boot (`./mvnw spring-boot:build-image`, `./gradlew bootBuildImage`).
+
+**Volumes** (dados que sobrevivem ao contêiner): ao remover o contêiner, a sua camada gravável **desaparece**. Para persistir:
+
+- **Volume nomeado** (`dados-mysql:/var/lib/mysql`): gerenciado pelo Docker; é a escolha para **bancos de dados**.
+- ***Bind mount*** (`./config:/app/config`): monta uma **pasta do computador** dentro do contêiner; útil em desenvolvimento (arquivos de configuração, código) e para scripts de inicialização.
+- ***tmpfs***: dados só em memória.
+- `docker volume ls` lista os volumes. Atenção: `docker compose down -v` **apaga os volumes**, ou seja, o banco inteiro.
+
+**Redes**: por padrão os contêineres ficam em uma rede *bridge*. Em redes **definidas pelo usuário** (e no Compose), cada contêiner é encontrado pelo **nome do serviço**, por DNS interno: a aplicação acessa `jdbc:mysql://db:3306/loja`, e **não** `localhost` (dentro do contêiner, `localhost` é **ele mesmo**). Diferença entre `ports` (publica a porta para o computador hospedeiro) e `expose` (só entre contêineres): o banco normalmente **não** precisa ser publicado, apenas acessado pela aplicação. Se você publicar `3306:3306` e já tiver um MySQL local, haverá conflito de porta (use `3307:3306`).
+
+**Docker Compose**: o arquivo `compose.yaml` (ou `compose.yml`) declara `services`, `volumes` e `networks`; a chave `version:` é obsoleta. Chaves principais de um serviço: `image` ou `build`, `ports`, `environment`/`env_file`, `volumes`, `networks`, `depends_on` (com `condition: service_healthy`), `healthcheck`, `restart: unless-stopped`, `command`, `profiles` (serviços opcionais, como `monitoring`) e limites de recursos (`mem_limit`). Comandos: `docker compose up -d`, `down`, `logs -f`, `ps`, `build`, `exec` e `config` (valida e mostra o arquivo resolvido).
+
+**Configuração de ambientes**:
+
+- A **mesma imagem** deve rodar em todos os ambientes (12-factor, tópico 7.14); o que muda é a **configuração**, passada por **variáveis de ambiente**. O Spring converte `SPRING_DATASOURCE_URL` em `spring.datasource.url` (*relaxed binding*, tópico 7.2), e `SPRING_PROFILES_ACTIVE=prod` ativa o perfil.
+- O Compose substitui `${VARIAVEL}` e `${VARIAVEL:-padrao}` com valores do ambiente ou de um arquivo **`.env`** (que **não** deve ser versionado). **Segredos** (senhas, chaves de API) ficam fora da imagem e do repositório: `env_file`, *Docker secrets* ou um gerenciador de segredos. Nunca os coloque em `ENV`/`ARG` do Dockerfile: ficam gravados nas camadas da imagem.
+- Variações por ambiente: `compose.override.yaml` é mesclado automaticamente ao `compose.yaml` (bom para desenvolvimento), e `-f compose.yaml -f compose.prod.yaml` seleciona outra combinação.
+- No desenvolvimento com Spring Boot, o suporte a Docker Compose (tópico 7.3) pode subir e derrubar os contêineres junto com a aplicação.
+
+**Exemplo**:
+
+```dockerfile
+# ---- estágio 1: compila (JDK + Maven Wrapper) ----
+FROM eclipse-temurin:25-jdk AS build
+WORKDIR /app
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+RUN ./mvnw -q dependency:go-offline            # baixa as dependências (camada reaproveitada do cache)
+COPY src ./src
+RUN ./mvnw -q package -DskipTests              # gera target/*.jar
+
+# ---- estágio 2: executa (só o JRE) ----
+FROM eclipse-temurin:25-jre
+WORKDIR /app
+RUN useradd --system --create-home appuser     # não roda como root
+COPY --from=build /app/target/*.jar app.jar
+USER appuser
+EXPOSE 8080
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]
+```
+
+```yaml
+# compose.yaml
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}      # vem do arquivo .env (não versionado)
+      MYSQL_DATABASE: loja
+    volumes:
+      - dados-mysql:/var/lib/mysql             # volume nomeado: o banco sobrevive ao "down"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+    networks: [backend]
+
+  app:
+    build: .                                   # usa o Dockerfile acima
+    ports: ["8080:8080"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/loja    # "db" = nome do serviço
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      db:
+        condition: service_healthy             # só sobe quando o banco responde
+    networks: [backend]
+
+volumes:
+  dados-mysql:
+
+networks:
+  backend:
+```
+
+```bash
+echo "DB_PASSWORD=troque-esta-senha" > .env    # não versione este arquivo (adicione ao .gitignore)
+docker compose up -d --build                   # constrói a imagem da aplicação e sobe db + app
+docker compose logs -f app                     # acompanha os logs da aplicação
+docker compose down                            # remove contêineres e rede (o volume permanece)
+docker compose down -v                         # remove também os volumes: o banco é APAGADO
+```
+
+**Explicação do exemplo**: o *Dockerfile* tem dois estágios: o primeiro compila com o JDK e o Maven Wrapper (tópico 5.4), baixando as dependências **antes** de copiar o código, para reaproveitar o *cache*; o segundo parte de uma imagem só com o JRE, copia apenas o JAR e roda como usuário comum. O `compose.yaml` sobe o banco com um **volume nomeado** (os dados sobrevivem a `down`) e um *healthcheck*, e a aplicação, que só inicia depois que o banco responde. A URL do banco usa `db`, o **nome do serviço**, e não `localhost`. A senha vem do `.env` e é injetada por variável de ambiente, o que o Spring converte nas propriedades `spring.datasource.*`. Nenhuma senha fica na imagem. (O usuário `root` é só para desenvolvimento local; em produção, crie um usuário próprio com permissões mínimas.)
+
+## 7.16 Spring AI
+
+**O que é**: projeto do ecossistema Spring que leva a **IA generativa** para aplicações Java. Oferece uma API **portátil** para conversar com **LLMs** (*Large Language Models*, como os da OpenAI, Anthropic, Google ou modelos locais via Ollama), no mesmo estilo do Spring Data para bancos: uma abstração, auto-configuração e *starters* por provedor, de modo que trocar de fornecedor é, em grande parte, trocar a dependência e as propriedades. Além do chat, cobre *embeddings*, bancos vetoriais, RAG e o protocolo MCP. **Versões**: o Spring AI **2.x** (disponível desde junho de 2026) roda sobre o **Spring Boot 4**; a série **1.x** é a das aplicações Spring Boot 3. A API evolui rápido: confira a documentação da versão que você usa.
+
+Alguns conceitos sobre LLMs que afetam o código:
+
+- Um LLM **gera texto** a partir de um ***prompt***, e é ***stateless***: **não lembra** das chamadas anteriores; quem reenvia o histórico é a aplicação.
+- As mensagens têm **papéis**: `system` (instruções e comportamento), `user` (a pergunta), `assistant` (a resposta do modelo) e `tool` (o resultado de uma ferramenta).
+- O custo e o limite se medem em ***tokens*** (pedaços de palavra); a **janela de contexto** é o máximo de *tokens* por chamada (prompt + resposta).
+- A saída é **não determinística** (a *temperature* controla a aleatoriedade) e o modelo pode **errar com convicção** (*alucinação*): toda resposta deve ser tratada como **não confiável** até ser validada.
+
+**Para que serve**: assistentes e *chatbots*, **classificação e extração de dados** de texto livre (transformar um e-mail em campos), resumos, respostas sobre documentos da empresa (RAG) e **agentes** que executam ações no sistema. **Quando evitar**: regras determinísticas (cálculos, validações, permissões) pertencem ao **código**, não ao modelo; também pese **custo e latência** por chamada, a **privacidade** (o texto é enviado a um terceiro, salvo modelo local) e a necessidade de validar a saída.
+
+**Como funciona**:
+
+- **Configuração**: importe o BOM `spring-ai-bom` e o *starter* do provedor (`spring-ai-starter-model-openai`; o padrão é `spring-ai-starter-model-<provedor>`). A chave e o modelo entram por propriedades (`spring.ai.openai.api-key`, `spring.ai.openai.chat.options.model`). **A chave vem de variável de ambiente, nunca do código nem do Git.** O Boot cria o `ChatModel` (camada de baixo nível) e o **`ChatClient.Builder`** (API de alto nível).
+- **`ChatClient`**: API **fluente**, parecida com o `RestClient`: `chatClient.prompt().system("...").user("...").call().content()`. `.stream().content()` devolve um `Flux<String>` (a resposta chega aos poucos). Padrões comuns (`defaultSystem`, `defaultAdvisors`, `defaultTools`) são definidos uma vez no *builder*.
+- **Prompts e *templates***: `.user(u -> u.text("Resuma em {n} linhas: {texto}").param("n", 3).param("texto", t))` preenche **variáveis** `{nome}`; o `PromptTemplate` faz o mesmo fora do `ChatClient`, e *templates* longos ficam em arquivos (`src/main/resources/prompts/*.st`). Boas práticas: instruções **claras** no `system`; **exemplos** da saída desejada (*few-shot*); pedir o formato explicitamente. **Atenção à *prompt injection***: o texto do usuário (ou de um documento lido) pode tentar **sobrescrever as suas instruções** ("ignore as regras anteriores..."). Trate-o como entrada **não confiável** e limite o que o modelo pode fazer.
+- **Respostas estruturadas**: `.entity(MinhaClasse.class)` pede ao modelo uma saída no formato do tipo Java (o Spring AI acrescenta ao *prompt* as instruções e o esquema JSON, e converte a resposta, com um `BeanOutputConverter`). Funciona bem com ***records***; para coleções, `.entity(new ParameterizedTypeReference<List<Item>>() {})`. Como o modelo pode devolver algo inválido, **valide** o resultado (Bean Validation) e trate a exceção de conversão; o 2.x tem um *advisor* que revalida a saída e tenta corrigi-la. `.chatResponse()` devolve também os **metadados** (uso de *tokens*).
+- **Memória de conversação**: como o LLM não lembra de nada, o Spring AI **reenvia o histórico** a cada chamada, usando três peças: **`ChatMemory`** (a política: o `MessageWindowChatMemory` mantém só as **últimas N mensagens**, uma janela deslizante), **`ChatMemoryRepository`** (onde guardar: em memória por padrão; JDBC, Cassandra, Neo4j e outros) e o ***advisor*** **`MessageChatMemoryAdvisor`** (injeta e salva as mensagens em cada chamada). O **`conversationId`** separa as conversas: `.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, id))`. Cuidados: o histórico **cresce** e consome *tokens* (por isso a janela); inclua o **usuário** no identificador para **não misturar** conversas de pessoas diferentes; e lembre que o histórico guarda dados pessoais (LGPD). O `PromptChatMemoryAdvisor` coloca o histórico como texto no `system`, e o `VectorStoreChatMemoryAdvisor` recupera trechos por **similaridade**.
+- ***Advisors***: **interceptadores** do `ChatClient` (como filtros de servlet ou AOP) que enriquecem ou observam cada chamada: memória, RAG (`QuestionAnswerAdvisor`), *log* (`SimpleLoggerAdvisor`). A **ordem** em que são executados importa. No 2.x, o laço de *tool calling* também é um *advisor* (`ToolCallingAdvisor`), registrado automaticamente.
+- ***Tool Calling***: o modelo **não executa código**: ele **pede** que a aplicação chame uma função. O ciclo: (1) a aplicação envia o *prompt* **com a descrição das ferramentas** (nome, descrição e esquema dos parâmetros); (2) o modelo responde "chame `statusDoPedido` com `{numero: 42}`"; (3) o Spring AI **executa o método Java** correspondente; (4) devolve o resultado ao modelo; (5) o modelo redige a resposta final. Define-se uma ferramenta anotando um método com `@Tool(description = "...")` (e os parâmetros com `@ToolParam(description = "...")`) e a registra com `.tools(objeto)` em uma chamada ou `.defaultTools(objeto)` no cliente. A **descrição é decisiva**: é com base nela que o modelo escolhe quando usar a ferramenta. No 2.x, ferramentas devem ser objetos com `@Tool` ou *beans* `ToolCallback` explícitos (funções soltas resolvidas por nome foram removidas).
+  - **Leitura x ação**: ferramentas que só **consultam** são de baixo risco; as que **alteram** algo (cancelar pedido, enviar e-mail) exigem cuidado: **valide permissões e regras dentro da ferramenta** (nunca confie no modelo), peça **confirmação humana** quando for crítico, torne a operação **idempotente** e registre em auditoria. Retorne **pouco texto** (custa *tokens*) e deixe as exceções claras, pois a mensagem volta ao modelo.
+- **Testes**: não chame o LLM real em testes unitários (lento, pago e **não determinístico**). Esconda o `ChatClient` atrás de uma **interface sua** (uma porta, tópico 6.6) e *mocke-a*, ou use `mock(ChatClient.class, RETURNS_DEEP_STUBS)` para a API fluente. A qualidade das respostas se avalia à parte (avaliadores, ou um modelo local via Ollama e Testcontainers).
+- **Observabilidade**: o Spring AI se integra ao Micrometer (métricas de uso de *tokens* e *traces* das chamadas, tópico 7.14), o que ajuda a controlar **custo e latência**.
+- **Outros recursos** (apenas para nomear): ***embeddings*** (vetores que representam o significado do texto), ***VectorStore*** (busca por similaridade) e **RAG** (*Retrieval-Augmented Generation*: buscar trechos relevantes dos seus documentos e entregá-los ao modelo junto com a pergunta), **MCP** (*Model Context Protocol*, padrão para expor ferramentas e contexto a modelos) e entrada/saída multimodal (imagens, áudio).
+
+**Exemplo**:
+
+```xml
+<!-- pom.xml (trecho): Spring AI 2.x, para Spring Boot 4; versão de exemplo -->
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-bom</artifactId>
+      <version>2.0.1</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-model-openai</artifactId>
+  </dependency>
+</dependencies>
+```
+
+```yaml
+# application.yml
+spring:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}                # nunca no código nem no Git
+      chat:
+        options:
+          model: ${MODELO_LLM}                  # nome do modelo conforme o provedor
+```
+
+```java
+public record ClassificacaoChamado(String categoria, String prioridade, String resumo) {}
+
+@Component
+class PedidoTools {
+    private final PedidoRepository repo;
+    PedidoTools(PedidoRepository repo) { this.repo = repo; }
+
+    @Tool(description = "Consulta o status de um pedido pelo número")
+    String statusDoPedido(@ToolParam(description = "Número do pedido") Long numero) {
+        return repo.findById(numero)
+                .map(p -> p.getStatus().name())
+                .orElse("pedido não encontrado");
+    }
+}
+
+@RestController
+class AssistenteController {
+    private final ChatClient suporte;        // com memória e ferramentas
+    private final ChatClient extrator;       // simples, só para saída estruturada
+
+    AssistenteController(ChatClient.Builder builder, ChatMemory chatMemory, PedidoTools tools) {
+        this.suporte = builder.clone()
+                .defaultSystem("Você é o atendente da Loja X. Responda em português, de forma objetiva.")
+                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .defaultTools(tools)
+                .build();
+        this.extrator = builder.build();
+    }
+
+    @PostMapping("/chat/{conversa}")
+    String conversar(@PathVariable String conversa, @RequestBody String pergunta) {
+        return suporte.prompt()
+                .user(pergunta)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversa))   // memória por conversa
+                .call()
+                .content();
+    }
+
+    @PostMapping("/chamados/classificar")
+    ClassificacaoChamado classificar(@RequestBody String texto) {
+        return extrator.prompt()
+                .system("Classifique o chamado. Prioridade: BAIXA, MEDIA ou ALTA.")
+                .user(u -> u.text("Chamado: {texto}").param("texto", texto))
+                .call()
+                .entity(ClassificacaoChamado.class);                            // resposta estruturada
+    }
+}
+```
+
+**Explicação do exemplo**: o BOM e o *starter* configuram o modelo, e a chave vem da variável de ambiente. O `PedidoTools` expõe um método como ferramenta: quando o cliente perguntar "como está o pedido 42?", o modelo **pede** a chamada de `statusDoPedido(42)`, o Spring AI executa o método, devolve o texto ao modelo e este redige a resposta final. O cliente `suporte` combina três recursos: o `system` fixa o comportamento, o `MessageChatMemoryAdvisor` repassa o histórico (usando o `ChatMemory` em memória, que o Boot configura sozinho) e o `conversationId` da URL **separa** as conversas, de forma que a pergunta "e o anterior?" faz sentido para o modelo. O `builder.clone()` evita que a configuração do `suporte` vaze para o `extrator`. No `/chamados/classificar`, o `.entity(...)` faz o Spring AI pedir um JSON no formato do *record* e **converter** a resposta em um objeto Java, que pode então ser validado como qualquer DTO. (O endpoint de chat não tem autenticação nem limite de uso: em produção, protegê-lo é indispensável, pois cada chamada custa dinheiro.)
+
 ---
 
 # Checklist de revisão
@@ -3987,3 +4950,11 @@ Marque o que você consegue **explicar em voz alta, com um exemplo**:
 - [ ] Spring Security: fluxo de autenticação, BCrypt, `hasRole`, 401 x 403, CSRF, sessão x JWT.
 - [ ] OpenFeign + Circuit Breaker + fallback (fail-open x fail-closed).
 - [ ] Testes: unitário x integração x slice, Mockito, `MockMvc`, Testcontainers.
+- [ ] Maven x Gradle: `pom.xml` e `build.gradle`, ciclo de vida (fases x *goals*), `dependencyManagement`/BOM, plugins e *wrappers*.
+- [ ] Testes avançados: `@RepeatedTest`/`@Timeout`, Mockito (`spy`, `InOrder`, *matchers*), teste de concorrência com `CountDownLatch`, Testcontainers e `@ServiceConnection`.
+- [ ] Concorrência com JPA: *lost update*, `@Version`, otimista x pessimista, propagação, *rollback* e *flush* x *commit*.
+- [ ] Spring Security na prática: HTTP Basic (`WWW-Authenticate`), BCrypt (*salt* e custo), `roles` x `authorities` e ordem das regras.
+- [ ] OpenAPI/Swagger: especificação x Swagger UI x springdoc, anotações, esquema de segurança e *Authorize*.
+- [ ] Observabilidade: logs x métricas x *traces*; Actuator → Micrometer → Prometheus → Grafana; cardinalidade das *tags*.
+- [ ] Docker e Compose: imagem x contêiner, *multi-stage*, volumes, redes (nome do serviço), configuração por variáveis de ambiente.
+- [ ] Spring AI: `ChatClient`, *prompts*, respostas estruturadas, memória de conversação, *Tool Calling* e *prompt injection*.
