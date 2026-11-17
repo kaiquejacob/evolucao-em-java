@@ -12,13 +12,116 @@ Cada tópico segue o mesmo molde:
 
 ## Sumário
 
-1. **Fundamentos da linguagem** (plataforma, tipos, operadores, controle de fluxo, arrays, métodos, strings)
-2. **Orientação a objetos** (classes, herança, polimorfismo, interfaces, enums, records, exceções...)
-3. **API padrão do Java** (coleções, generics, datas, regex, I/O, serialização, números, reflection, annotations)
-4. **Java avançado** (lambdas, Optional, Streams, concorrência, memória)
-5. **Persistência e qualidade** (JDBC, JPA, build, testes)
-6. **Arquitetura e boas práticas** (SOLID, Clean Code, padrões de projeto)
-7. **Ecossistema Spring** (IoC/DI, Boot, Web, Data, Security, Cloud, testes)
+1. [**Fundamentos da linguagem**](#parte-1-fundamentos-da-linguagem) (plataforma, tipos, operadores, controle de fluxo, arrays, métodos, strings)
+   - [1.1 A plataforma Java (JDK, JRE, JVM)](#11-a-plataforma-java-jdk-jre-jvm)
+   - [1.2 Estrutura de um programa Java](#12-estrutura-de-um-programa-java)
+   - [1.3 Variáveis e tipos de dados](#13-variáveis-e-tipos-de-dados)
+   - [1.4 Conversão de tipos (casting)](#14-conversão-de-tipos-casting)
+   - [1.5 Operadores](#15-operadores)
+   - [1.6 Estruturas condicionais](#16-estruturas-condicionais)
+   - [1.7 Estruturas de repetição](#17-estruturas-de-repetição)
+   - [1.8 Arrays](#18-arrays)
+   - [1.9 Métodos](#19-métodos)
+   - [1.10 Strings](#110-strings)
+   - [1.11 Classes wrapper, autoboxing e unboxing](#111-classes-wrapper-autoboxing-e-unboxing)
+   - [1.12 Entrada e saída no console](#112-entrada-e-saída-no-console)
+2. [**Orientação a objetos**](#parte-2-orientação-a-objetos) (classes, herança, polimorfismo, interfaces, enums, records, exceções...)
+   - [2.1 Classes e objetos](#21-classes-e-objetos)
+   - [2.2 Construtores](#22-construtores)
+   - [2.3 As palavras `this` e `super`](#23-as-palavras-this-e-super)
+   - [2.4 Encapsulamento e modificadores de acesso](#24-encapsulamento-e-modificadores-de-acesso)
+   - [2.5 Membros `static` e blocos de inicialização](#25-membros-static-e-blocos-de-inicialização)
+   - [2.6 Herança](#26-herança)
+   - [2.7 Sobrescrita (*override*) e sobrecarga (*overload*)](#27-sobrescrita-override-e-sobrecarga-overload)
+   - [2.8 Polimorfismo](#28-polimorfismo)
+   - [2.9 Classes abstratas](#29-classes-abstratas)
+   - [2.10 Interfaces](#210-interfaces)
+   - [2.11 O modificador `final`](#211-o-modificador-final)
+   - [2.12 Enumerações (`enum`)](#212-enumerações-enum)
+   - [2.13 Records](#213-records)
+   - [2.14 Classes internas, locais e anônimas](#214-classes-internas-locais-e-anônimas)
+   - [2.15 Associação, agregação e composição](#215-associação-agregação-e-composição)
+   - [2.16 A classe `Object`: `equals`, `hashCode` e `toString`](#216-a-classe-object-equals-hashcode-e-tostring)
+   - [2.17 Tratamento de exceções](#217-tratamento-de-exceções)
+   - [2.18 Pacotes e módulos](#218-pacotes-e-módulos)
+   - [2.19 Classes seladas e pattern matching](#219-classes-seladas-e-pattern-matching)
+3. [**API padrão do Java**](#parte-3-api-padrão-do-java) (coleções, generics, datas, regex, I/O, serialização, números, reflection, annotations)
+   - [3.1 Visão geral do Collections Framework](#31-visão-geral-do-collections-framework)
+   - [3.2 List](#32-list)
+   - [3.3 Set](#33-set)
+   - [3.4 Map](#34-map)
+   - [3.5 Queue e Deque](#35-queue-e-deque)
+   - [3.6 `Comparable`, `Comparator`, `Iterator` e utilitários](#36-comparable-comparator-iterator-e-utilitários)
+   - [3.7 Números precisos: `BigDecimal`, `BigInteger` e `Math`](#37-números-precisos-bigdecimal-biginteger-e-math)
+   - [3.8 Generics](#38-generics)
+   - [3.9 Datas e horas (`java.time`)](#39-datas-e-horas-javatime)
+   - [3.10 Formatação e internacionalização](#310-formatação-e-internacionalização)
+   - [3.11 Expressões regulares (regex)](#311-expressões-regulares-regex)
+   - [3.12 Arquivos e I/O clássico (`java.io`)](#312-arquivos-e-io-clássico-javaio)
+   - [3.13 NIO.2 (`java.nio.file`)](#313-nio2-javaniofile)
+   - [3.14 Serialização](#314-serialização)
+   - [3.15 Reflection](#315-reflection)
+   - [3.16 Annotations e Annotation Processing](#316-annotations-e-annotation-processing)
+   - [3.17 Logging](#317-logging)
+   - [3.18 Outras classes utilitárias importantes](#318-outras-classes-utilitárias-importantes)
+   - [3.13B NIO.2 (`java.nio.file`) (versão B, duplicata pendente)](#313b-nio2-javaniofile)
+   - [3.14B Serialização (versão B, duplicata pendente)](#314b-serialização)
+   - [3.15B Reflection (reflexão) (versão B, duplicata pendente)](#315b-reflection-reflexão)
+   - [3.16B Annotations e *annotation processing* (versão B, duplicata pendente)](#316b-annotations-e-annotation-processing)
+   - [3.17B Logging (versão B, duplicata pendente)](#317b-logging)
+   - [3.18B Classes utilitárias úteis (versão B, duplicata pendente)](#318b-classes-utilitárias-úteis)
+4. [**Java avançado**](#parte-4-java-avançado) (lambdas, Optional, Streams, concorrência, memória)
+   - [4.1 Lambdas e interfaces funcionais](#41-lambdas-e-interfaces-funcionais)
+   - [4.2 Method references](#42-method-references)
+   - [4.3 Optional](#43-optional)
+   - [4.4 Streams](#44-streams)
+   - [4.5 Concorrência: threads, sincronização e coleções concorrentes](#45-concorrência-threads-sincronização-e-coleções-concorrentes)
+   - [4.6 Executors, `Future` e `CompletableFuture`](#46-executors-future-e-completablefuture)
+   - [4.7 Threads virtuais (Java 21)](#47-threads-virtuais-java-21)
+   - [4.8 Gerenciamento de memória e *Garbage Collector*](#48-gerenciamento-de-memória-e-garbage-collector)
+5. [**Persistência e qualidade**](#parte-5-persistência-e-qualidade) (JDBC, JPA, build, testes)
+   - [5.1 Bancos de dados: conceitos essenciais](#51-bancos-de-dados-conceitos-essenciais)
+   - [5.2 JDBC (*Java Database Connectivity*)](#52-jdbc-java-database-connectivity)
+   - [5.3 JPA e Hibernate (ORM)](#53-jpa-e-hibernate-orm)
+   - [5.4 Ferramentas de build, dependências e Lombok](#54-ferramentas-de-build-dependências-e-lombok)
+      - [5.4.1 Aprofundamento: `pom.xml`, `build.gradle`, ciclo de vida, plugins e *wrappers*](#541-aprofundamento-pomxml-buildgradle-ciclo-de-vida-plugins-e-wrappers)
+   - [5.5 Testes automatizados](#55-testes-automatizados)
+      - [5.5.1 Aprofundamento: recursos avançados de JUnit 5 e Mockito, e testes de concorrência](#551-aprofundamento-recursos-avançados-de-junit-5-e-mockito-e-testes-de-concorrência)
+   - [5.6 Concorrência e transações com JPA (`@Version`)](#56-concorrência-e-transações-com-jpa-version)
+6. [**Arquitetura e boas práticas**](#parte-6-arquitetura-e-boas-práticas) (SOLID, Clean Code, padrões de projeto)
+   - [6.1 Princípios SOLID](#61-princípios-solid)
+   - [6.2 Clean Code e boas práticas de código](#62-clean-code-e-boas-práticas-de-código)
+   - [6.3 Padrões de projeto criacionais](#63-padrões-de-projeto-criacionais)
+      - [6.3.1 Singleton](#631-singleton)
+      - [6.3.2 Builder](#632-builder)
+      - [6.3.3 Factory (Simple Factory / Factory Method)](#633-factory-simple-factory--factory-method)
+   - [6.4 Padrões de projeto estruturais](#64-padrões-de-projeto-estruturais)
+   - [6.5 Padrões de projeto comportamentais](#65-padrões-de-projeto-comportamentais)
+   - [6.6 Arquitetura de software](#66-arquitetura-de-software)
+   - [6.7 Princípios de design de APIs REST](#67-princípios-de-design-de-apis-rest)
+7. [**Ecossistema Spring**](#parte-7-ecossistema-spring) (IoC/DI, Boot, Web, Data, Security, Cloud, testes)
+   - [7.1 Spring Framework: IoC e Injeção de Dependência](#71-spring-framework-ioc-e-injeção-de-dependência)
+   - [7.2 Configuração externa e propriedades](#72-configuração-externa-e-propriedades)
+   - [7.3 Spring Boot](#73-spring-boot)
+   - [7.4 AOP (Programação Orientada a Aspectos)](#74-aop-programação-orientada-a-aspectos)
+   - [7.5 Spring MVC e APIs REST](#75-spring-mvc-e-apis-rest)
+      - [7.5.1 Aprofundamento: OpenAPI e Swagger (documentação de APIs REST)](#751-aprofundamento-openapi-e-swagger-documentação-de-apis-rest)
+   - [7.6 Spring Data JPA](#76-spring-data-jpa)
+   - [7.7 Spring Data REST](#77-spring-data-rest)
+   - [7.8 Spring Data MongoDB](#78-spring-data-mongodb)
+   - [7.9 Spring Data Redis e cache](#79-spring-data-redis-e-cache)
+   - [7.10 Eventos, assincronismo e agendamento](#710-eventos-assincronismo-e-agendamento)
+   - [7.11 Spring Security](#711-spring-security)
+      - [7.11.1 Aprofundamento: HTTP Basic, BCrypt e *roles* na prática](#7111-aprofundamento-http-basic-bcrypt-e-roles-na-prática)
+   - [7.12 Spring Cloud OpenFeign e resiliência](#712-spring-cloud-openfeign-e-resiliência)
+   - [7.13 Testes no Spring](#713-testes-no-spring)
+      - [7.13.1 Aprofundamento: testes de integração com Testcontainers](#7131-aprofundamento-testes-de-integração-com-testcontainers)
+   - [7.14 Observabilidade, empacotamento e execução](#714-observabilidade-empacotamento-e-execução)
+      - [7.14.1 Aprofundamento: logs, métricas e *traces* com Actuator, Micrometer, Prometheus e Grafana](#7141-aprofundamento-logs-métricas-e-traces-com-actuator-micrometer-prometheus-e-grafana)
+   - [7.15 Docker e Docker Compose](#715-docker-e-docker-compose)
+   - [7.16 Spring AI](#716-spring-ai)
+
+[Checklist de revisão](#checklist-de-revisão)
 
 ---
 
@@ -82,6 +185,12 @@ java Ola.java      # Java 11+: compila em memória e executa em um passo
 
 **Explicação do exemplo**: `javac` produz o arquivo `Ola.class`, sem executar nada. O comando `java Ola` inicia a JVM, que carrega a classe `Ola` e invoca o método `main`; o resultado é a linha `Olá, JVM!` no console. A terceira forma é um atalho para testes rápidos: compila em memória e executa, sem deixar `.class` no disco.
 
+---
+
+## Resumo simples
+
+Java transforma o código em bytecode, que a JVM executa em diferentes sistemas. O JDK reúne as ferramentas para desenvolver; a JRE fornece o ambiente para rodar; e a JVM executa o programa.
+
 ## 1.2 Estrutura de um programa Java
 
 **O que é**: todo código Java vive dentro de **tipos** (classes, interfaces, enums, records). A execução começa em um método especial, o `main`. Os tipos são agrupados em **pacotes** (`package`) e usam tipos de outros pacotes por meio de `import`.
@@ -125,6 +234,12 @@ java -cp out br.com.exemplo.Saudacao           # usa o nome COMPLETO (pacote + c
 ```
 
 **Explicação do exemplo**: o compilador cria, dentro de `out`, as pastas do pacote e coloca o `.class` nelas. Para executar, informa-se o **nome totalmente qualificado** (`br.com.exemplo.Saudacao`) e onde procurar as classes (`-cp`, o *classpath*). A saída é `Olá, Ana` e `Olá, Bia`, uma por linha.
+
+---
+
+## Resumo simples
+
+Um programa Java organiza o código em classes e outros tipos, agrupados em pacotes. A execução começa por um método main, enquanto imports permitem usar tipos de outros pacotes.
 
 ## 1.3 Variáveis e tipos de dados
 
@@ -184,6 +299,12 @@ System.out.println(x + " " + y);   // 5 99
 
 **Explicação do exemplo**: cada variável primitiva guarda seu valor diretamente. `1_000_000` é só legibilidade; o `L` é obrigatório porque `8_000_000_000` estoura o `int`. `PI` não pode mudar. `var nome` torna-se `String`. A última parte mostra que primitivos são **independentes**: alterar `y` não muda `x`, e a saída é `5 99`.
 
+---
+
+## Resumo simples
+
+Variáveis guardam valores e cada uma tem um tipo definido. Os tipos primitivos guardam valores simples; os tipos de referência apontam para objetos.
+
 ## 1.4 Conversão de tipos (casting)
 
 **O que é**: transformar um valor de um tipo em outro. A conversão pode ser **implícita** (feita pelo compilador) ou **explícita** (você escreve o *cast*, `(tipo) valor`).
@@ -220,6 +341,12 @@ System.out.println(Math.round(3.5));    // 4
 ```
 
 **Explicação do exemplo**: na primeira linha, os dois operandos são `int`, então a divisão é inteira e o resto é descartado. No cast `(double) a / b`, o `a` vira `double` **antes** da divisão, e o `b` é promovido, dando 2.5. `(byte) 200` mantém só os 8 bits de baixo (11001000), que, em complemento de dois, valem -56. O `x += 5` compila porque o operador composto inclui o cast. A soma `MAX_VALUE + 1` estoura e dá a volta para o menor `int`.
+
+---
+
+## Resumo simples
+
+Casting é a conversão de um valor para outro tipo. Algumas conversões são automáticas; outras precisam ser escritas e podem perder informação.
 
 ## 1.5 Operadores
 
@@ -271,6 +398,12 @@ System.out.println(5.0 / 0);       // Infinity
 
 **Explicação do exemplo**: em `grandePar`, as duas condições são verdadeiras. `x += 5` é `x = x + 5`. No ternário, a condição `15 > 10` escolhe `"grande"`. Em `i++`, o valor antigo (5) vai para `a`; em `++i`, o `i` é incrementado antes e `b` recebe 7. A concatenação é da esquerda para a direita: `1 + 2` ainda é soma (3) e só depois vira texto; em `"a" + 1 + 2`, o primeiro `+` já concatena, resultando em `a12`. Dividir `double` por zero dá `Infinity`; dividir `int` por zero lança exceção.
 
+---
+
+## Resumo simples
+
+Operadores realizam ações sobre valores, como calcular, comparar ou combinar condições. A ordem das operações e o tipo dos operandos influenciam o resultado.
+
 ## 1.6 Estruturas condicionais
 
 **O que é**: comandos que escolhem qual trecho de código executar conforme uma condição ou um valor.
@@ -309,6 +442,12 @@ System.out.println(tipo);               // Dia útil
 ```
 
 **Explicação do exemplo**: com `nota = 85`, a primeira condição (`>= 90`) é falsa, a segunda (`>= 70`) é verdadeira e imprime `B`; o `else` final é ignorado. No `switch`, `dia = 3` casa com o segundo `case`, e a expressão devolve `"Dia útil"`, que é atribuído a `tipo`. O `default` é exigido porque um `int` tem valores demais para serem listados; com um `enum`, listar todas as constantes bastaria.
+
+---
+
+## Resumo simples
+
+Condicionais escolhem qual trecho do programa será executado conforme uma condição. Em Java, as formas mais comuns são if/else e switch.
 
 ## 1.7 Estruturas de repetição
 
@@ -359,6 +498,12 @@ for (int[] linha : m) {
 
 **Explicação do exemplo**: no primeiro laço, quando `i` vale 3 o `continue` pula o `print` e o laço segue para `i = 4`, então a saída é `1 2 4 5`. O `do-while` incrementa `n` antes de testar a condição, de modo que o corpo roda ao menos uma vez e para quando `n` chega a 3. No terceiro trecho, o *for-each* externo percorre as linhas e o interno os valores; ao achar o 3, `break busca` encerra os dois laços de uma vez (um `break` simples sairia só do interno).
 
+---
+
+## Resumo simples
+
+Laços repetem instruções enquanto uma condição permitir ou para cada item de uma sequência. for, while e do-while atendem a diferentes formas de repetição.
+
 ## 1.8 Arrays
 
 **O que é**: estrutura de **tamanho fixo** que guarda elementos do **mesmo tipo** em posições numeradas a partir de 0. Em Java, o array é um **objeto** (vive no heap), mesmo quando guarda primitivos, e a variável guarda a **referência** para ele.
@@ -403,6 +548,12 @@ System.out.println(irregular[1].length);            // 3
 ```
 
 **Explicação do exemplo**: o array nasce com zeros e é preenchido posição a posição. Em `mesmo = notas` **não há cópia**: as duas variáveis referenciam o mesmo objeto, então alterar `mesmo[0]` muda também `notas[0]` (a saída é `10`). `Arrays.copyOf` cria um array **novo**, e por isso mudar `copia[1]` não afeta `notas`; as duas impressões mostram a diferença. O array irregular tem duas linhas de tamanhos diferentes (1 e 3), o que só é possível porque uma matriz em Java é um array de arrays.
+
+---
+
+## Resumo simples
+
+Um array guarda vários valores do mesmo tipo em posições numeradas, começando pelo índice zero. Seu tamanho é fixo depois da criação.
 
 ## 1.9 Métodos
 
@@ -455,6 +606,12 @@ System.out.println(a + " " + arr[0]);     // 5 0
 
 **Explicação do exemplo**: `soma(1, 2, 3)` só casa com a versão de varargs. Em `soma(1, 2)`, os dois `int` se ampliam para `double`, e essa chamada é escolhida **antes** de se considerar varargs, por isso o resultado é `3.0`. `fatorial(5)` empilha cinco chamadas até o caso base e multiplica na volta (5 × 4 × 3 × 2 × 1 = 120). Em `alterar`, `x = 0` muda apenas a cópia local (o `a` continua 5); `v[0] = 0` altera o **mesmo array** que o chamador tem (por isso `arr[0]` vira 0); `v = new int[]{9}` só aponta a cópia local da referência para outro array, sem efeito fora do método.
 
+---
+
+## Resumo simples
+
+Métodos agrupam instruções sob um nome para executar uma tarefa. Eles podem receber parâmetros e devolver um resultado, ajudando a reutilizar e organizar o código.
+
 ## 1.10 Strings
 
 **O que é**: `String` é a classe que representa **texto**, uma sequência de `char`. É **imutável**: depois de criada, o conteúdo nunca muda; todo método que "altera" (`toUpperCase`, `replace`, `concat`) devolve **uma nova** String e deixa a original intacta.
@@ -499,6 +656,12 @@ String json = """
 
 **Explicação do exemplo**: `a` e `b` referenciam o mesmo objeto do pool; `c` é outro objeto, por isso `==` dá `false` embora `equals` dê `true`. A chamada `nome.toUpperCase()` sem atribuição não faz nada útil, porque devolve uma nova String que é jogada fora; já `nome.trim().toUpperCase()` encadeia dois métodos e imprime `MARIA`. O `StringBuilder` altera o **mesmo** buffer a cada `append`, sem criar Strings intermediárias, e o resultado final é `0 1 2`. O text block guarda o JSON sem precisar escapar as aspas.
 
+---
+
+## Resumo simples
+
+String representa texto e é imutável: operações como substituir ou mudar maiúsculas devolvem uma nova String. Para montar texto repetidamente, StringBuilder evita criar muitos objetos intermediários.
+
 ## 1.11 Classes wrapper, autoboxing e unboxing
 
 **O que é**: cada tipo primitivo tem uma classe correspondente que o "embrulha" em um objeto: `byte→Byte`, `short→Short`, `int→Integer`, `long→Long`, `float→Float`, `double→Double`, `char→Character`, `boolean→Boolean`. **Autoboxing** é a conversão automática de primitivo para wrapper (`Integer x = 5;`); **unboxing** é o caminho inverso (`int y = x;`).
@@ -535,6 +698,12 @@ System.out.println(Character.isDigit('7'));   // true
 
 **Explicação do exemplo**: de -128 a 127, `valueOf` devolve sempre o mesmo objeto do cache, então `a == b` é `true`; para 128 são criados dois objetos distintos e o `==` (que compara referências) dá `false`, enquanto `equals` compara os valores e dá `true`. Esse comportamento é a razão da regra "compare wrappers com `equals`". Em `lista.add(5)`, o `int` é convertido em `Integer` automaticamente, e `lista.get(0)` faz o caminho inverso.
 
+---
+
+## Resumo simples
+
+Wrappers são classes que representam os tipos primitivos como objetos, como Integer para int. Autoboxing e unboxing fazem a conversão entre primitivo e wrapper automaticamente.
+
 ## 1.12 Entrada e saída no console
 
 **O que é**: o Java expõe três fluxos padrão: **`System.out`** (saída), **`System.err`** (saída de erros) e **`System.in`** (entrada, em bytes). Para ler texto de forma prática, usa-se `Scanner` ou `BufferedReader`.
@@ -567,6 +736,12 @@ System.err.println("isto vai para o fluxo de erro");
 **Explicação do exemplo**: se o usuário digitar `Ana` e `30`, o programa imprime `Ana tem 30 anos e 1.234,50 reais` em um computador configurado para pt-BR (ou `1,234.50` em en-US, porque `%,.2f` segue o `Locale` padrão). Ler a idade com `nextLine()` + `parseInt` evita deixar uma quebra de linha no buffer. A mensagem em `System.err` é separada da saída normal: no terminal aparece junto, mas pode ser redirecionada para outro destino (`2> erros.txt`).
 
 ---
+
+---
+
+## Resumo simples
+
+O console usa fluxos padrão para entrada, saída e mensagens de erro. Scanner e BufferedReader ajudam a ler o que a pessoa digita.
 
 # Parte 2: Orientação a objetos
 
@@ -615,6 +790,12 @@ System.out.println(a == c);              // false
 
 **Explicação do exemplo**: `new Carro()` cria o primeiro objeto e `a` recebe seu endereço. Em `Carro b = a`, **não nasce um segundo carro**: `a` e `b` são dois nomes para o mesmo objeto, então mudar `b.nome` muda o que `a.nome` mostra (`Gol`). `c` é um objeto novo, com `nome` ainda `null`, por isso `a == c` é `false` e `a == b` é `true`.
 
+---
+
+## Resumo simples
+
+Uma classe descreve os dados e comportamentos de um tipo de objeto. Um objeto é uma instância concreta da classe, com seus próprios valores.
+
 ## 2.2 Construtores
 
 **O que é**: método especial executado na criação do objeto (`new`), com o **mesmo nome da classe** e **sem tipo de retorno** (nem `void`). Sua função é deixar o objeto **em um estado válido** desde o primeiro instante.
@@ -659,6 +840,12 @@ Pessoa recemNascida = new Pessoa("Bia");        // idade 0
 
 **Explicação do exemplo**: o construtor principal valida os dados antes de atribuí-los, então é impossível existir uma `Pessoa` sem nome ou com idade negativa. O segundo construtor não repete a lógica: `this(nome, 0)` redireciona para o principal. A linha comentada não compila porque, ao declarar construtores, perdemos o padrão sem argumentos. Como os campos são `final`, ficam definidos para sempre no construtor.
 
+---
+
+## Resumo simples
+
+Construtores são executados quando um objeto é criado e ajudam a deixá-lo em um estado válido. Têm o mesmo nome da classe e não declaram tipo de retorno.
+
 ## 2.3 As palavras `this` e `super`
 
 **O que é**: `this` é a **referência ao objeto atual** (aquele em cujo método ou construtor o código está executando). `super` é a forma de acessar a **parte da superclasse** do objeto atual.
@@ -696,6 +883,12 @@ System.out.println(new Cao("Rex").som());    // ... Au!
 ```
 
 **Explicação do exemplo**: ao criar `new Cao("Rex")`, o construtor de `Cao` chama `super(nome)`, que guarda o nome na parte `Animal` do objeto. Em `som()`, `super.som()` executa a versão do pai (`"..."`) e o filho concatena `  Au! `, produzindo `... Au!`. Sem `super.`, a chamada `som()` dentro de `som()` seria recursiva.
+
+---
+
+## Resumo simples
+
+this aponta para o objeto atual e ajuda a acessar seus membros. super permite acessar membros e construtores definidos na classe pai.
 
 ## 2.4 Encapsulamento e modificadores de acesso
 
@@ -747,6 +940,12 @@ System.out.println(c.getSaldo());                 // 100.0
 
 **Explicação do exemplo**: `saldo` só muda por `depositar`, que impõe a regra "valor positivo"; não há como colocar a conta em estado inválido. O getter do histórico devolve `List.copyOf`, então quem recebe a lista não consegue adicionar ou remover itens do histórico real (tentar lançaria `UnsupportedOperationException`).
 
+---
+
+## Resumo simples
+
+Encapsulamento protege os dados internos e controla como eles podem ser lidos ou alterados. Modificadores como private e public definem os limites de acesso.
+
 ## 2.5 Membros `static` e blocos de inicialização
 
 **O que é**: um membro `static` pertence à **classe**, não a cada objeto: existe **uma única cópia**, compartilhada por todas as instâncias, acessada por `Classe.membro`. Um método `static` não tem `this` e, por isso, não acessa diretamente membros de instância.
@@ -786,6 +985,12 @@ System.out.println(Filho.criados);               // 2
 
 **Explicação do exemplo**: na primeira criação, a saída segue a ordem 1, 2, 3, 4, 5, 6: primeiro os blocos estáticos (pai, depois filho), depois, de cima para baixo, o bloco de instância e o construtor do pai e, por fim, os do filho. Na **segunda** criação aparecem só 3, 4, 5 e 6, pois os estáticos já foram executados. `criados` é compartilhado, então termina em 2.
 
+---
+
+## Resumo simples
+
+Membros static pertencem à classe e são compartilhados, em vez de existirem separadamente em cada objeto. Blocos de inicialização executam código quando a classe ou objeto é inicializado.
+
 ## 2.6 Herança
 
 **O que é**: mecanismo pelo qual uma classe (**subclasse**) herda atributos e métodos de outra (**superclasse**) por meio de `extends`, podendo acrescentar membros novos e **especializar** o comportamento herdado. Em Java, uma classe tem **uma única** superclasse direta (herança simples), e toda classe herda, direta ou indiretamente, de `Object`.
@@ -824,6 +1029,12 @@ System.out.println(f instanceof Funcionario);      // true
 ```
 
 **Explicação do exemplo**: `Gerente` herda o atributo `salario` e o construtor do pai é chamado por `super(salario)`. A variável `f` tem o tipo do pai, mas aponta para um `Gerente`; ao chamar `bonus()`, a JVM executa a versão do **objeto real** (a do `Gerente`), e o resultado é 20% de 10.000, ou seja, `2000.0`. Isso funciona porque um `Gerente` pode ser usado em qualquer lugar em que um `Funcionario` é esperado.
+
+---
+
+## Resumo simples
+
+Herança permite que uma classe especializada aproveite e amplie o comportamento de uma classe mais geral. Em Java, uma classe estende diretamente apenas uma outra classe.
 
 ## 2.7 Sobrescrita (*override*) e sobrecarga (*overload*)
 
@@ -876,6 +1087,12 @@ System.out.println(v.examinar(new Gato()));      // gato
 
 **Explicação do exemplo**: `a.som()` devolve `Miau` porque a sobrescrita é decidida na execução, olhando o objeto real (um `Gato`). Já `v.examinar(a)` chama a versão para `Animal`: como `examinar` é **sobrecarregado**, o compilador escolhe pela variável `a`, cujo tipo declarado é `Animal`, mesmo que o objeto seja um `Gato`. Só na última linha o argumento tem tipo `Gato`.
 
+---
+
+## Resumo simples
+
+Sobrescrita substitui, numa subclasse, a implementação herdada de um método. Sobrecarga cria métodos com o mesmo nome, mas parâmetros diferentes.
+
 ## 2.8 Polimorfismo
 
 **O que é**: capacidade de tratar objetos de **tipos diferentes pela mesma interface**. Uma variável do tipo pai (classe ou interface) pode apontar para um objeto de **qualquer subtipo**, e a versão do método executada é a do **objeto real**, escolhida em **tempo de execução** (*dynamic dispatch*). "Polimorfismo" significa "muitas formas": uma chamada, vários comportamentos.
@@ -909,6 +1126,12 @@ for (Pagamento p : formas) {
 ```
 
 **Explicação do exemplo**: o laço trata todos como `Pagamento` e chama `calcularTaxa`, sem saber qual é a classe concreta. A saída é `Pix: 0.0`, `Cartao: 6.0` e `Boleto: 3.5`: cada objeto executa a **sua** versão. Para adicionar `Cripto`, basta criar uma nova classe que implemente `Pagamento`; o laço (e qualquer código que use `Pagamento`) permanece intacto.
+
+---
+
+## Resumo simples
+
+Polimorfismo permite tratar objetos diferentes por um tipo comum, como uma interface ou classe pai. O método executado pode ser escolhido conforme o tipo real do objeto.
 
 ## 2.9 Classes abstratas
 
@@ -958,6 +1181,12 @@ new RelatorioVendas().gerar();
 ```
 
 **Explicação do exemplo**: `gerar()` fixa a **ordem** dos passos (cabeçalho, corpo, rodapé) e é `final` para que ninguém quebre o algoritmo. O cabeçalho tem implementação padrão, e o `corpo()` é abstrato: `RelatorioVendas` é obrigada a fornecê-lo. A saída é `RELATÓRIO`, `Vendas: 10` e `-- fim --`.
+
+---
+
+## Resumo simples
+
+Uma classe abstrata representa uma base incompleta que não pode ser instanciada diretamente. Ela pode combinar código pronto com métodos que as subclasses precisam implementar.
 
 ## 2.10 Interfaces
 
@@ -1009,6 +1238,12 @@ System.out.println(new Email().origem());           // auditavel
 
 **Explicação do exemplo**: `Email` só precisou implementar `enviar`; `enviarUrgente` vem pronto da interface e chama `enviar`. As duas interfaces `Auditavel` e `Rastreavel` oferecem `origem()` com a mesma assinatura, o que gera ambiguidade, e o compilador **exige** que `Email` a resolva: aqui, escolhendo a versão de `Auditavel`.
 
+---
+
+## Resumo simples
+
+Interfaces definem contratos que classes podem implementar. Elas permitem que tipos distintos ofereçam comportamentos comuns sem depender de uma mesma classe base.
+
 ## 2.11 O modificador `final`
 
 **O que é**: `final` significa "não pode mudar depois de definido". O efeito depende de onde é aplicado.
@@ -1052,6 +1287,12 @@ class Config {
 ```
 
 **Explicação do exemplo**: `MAX_TENTATIVAS` é uma constante. O campo `nome` só recebe valor no construtor. O campo `itens` é `final`, mas a lista que ele referencia pode receber elementos; `final` não torna o conteúdo imutável. `contador` nunca é reatribuída, portanto é *efetivamente final* e a lambda pode usá-la; se você fizesse `contador++` depois, a lambda deixaria de compilar.
+
+---
+
+## Resumo simples
+
+final restringe mudanças, e seu efeito depende do local em que aparece. Pode impedir reatribuição de uma variável, sobrescrita de método ou herança de classe.
 
 ## 2.12 Enumerações (`enum`)
 
@@ -1097,6 +1338,12 @@ for (TipoPagamento x : TipoPagamento.values())
 
 **Explicação do exemplo**: cada constante é um objeto com seu próprio `rotulo` (passado ao construtor) e sua própria implementação de `desconto`, então não há `if` ou `switch` espalhado pelo código para decidir o desconto. `valueOf("DEBITO")` devolve a constante correspondente (um nome inexistente lançaria `IllegalArgumentException`). O laço com `values()` mostra a ordem de declaração: `ordinal()` 0 e 1.
 
+---
+
+## Resumo simples
+
+Enum é um tipo para um conjunto fechado de constantes nomeadas. Cada constante é uma instância única e pode carregar dados ou comportamentos.
+
 ## 2.13 Records
 
 **O que é**: forma enxuta de declarar uma **classe de dados imutável** (Java 16, recurso final). Você lista os **componentes** entre parênteses, e o compilador gera: os campos `private final`, o **construtor canônico**, os métodos de acesso (`nome()`, **sem** prefixo `get`), `equals`, `hashCode` e `toString` baseados nos componentes.
@@ -1134,6 +1381,12 @@ System.out.println(a == b);            // false  (objetos distintos)
 ```
 
 **Explicação do exemplo**: sem escrever nenhum método além da validação, o record já oferece `toString`, `equals` por **conteúdo** e os acessores. O construtor compacto garante que nenhum `Produto` tenha preço negativo. `a.equals(b)` é `true` porque os componentes coincidem, enquanto `a == b` continua falso, pois são dois objetos.
+
+---
+
+## Resumo simples
+
+Records são classes compactas para representar dados imutáveis. O compilador gera componentes, construtor e métodos comuns como equals, hashCode e toString.
 
 ## 2.14 Classes internas, locais e anônimas
 
@@ -1186,6 +1439,12 @@ Runnable lambda = () -> System.out.println("rodando"); // mesma ideia, mais curt
 
 **Explicação do exemplo**: a `Interna` só existe ligada a um objeto `Externa` (por isso `e.new Interna()`), e por isso lê o campo `nome` da externa diretamente. A `Aninhada` é criada sem nenhum objeto externo. O `Runnable` anônimo e a lambda fazem o mesmo; a lambda é preferida porque `Runnable` tem um único método abstrato.
 
+---
+
+## Resumo simples
+
+Classes internas são declaradas dentro de outras classes ou métodos. Elas ajudam a aproximar um tipo auxiliar do contexto em que é usado.
+
 ## 2.15 Associação, agregação e composição
 
 **O que é**: formas de relacionar objetos, em geral lidas como **"tem um"** (*has-a*), em contraste com a herança, que é **"é um"**.
@@ -1236,6 +1495,12 @@ System.out.println(j.time == t);                  // true
 
 **Explicação do exemplo**: `Carro` cria seu próprio `Motor` e o esconde, expondo apenas `ligar()` (composição com delegação). Já `Time` e `Jogador` formam uma associação bidirecional: o método `adicionar` atualiza `jogadores` e também `j.time`, de modo que os dois lados nunca ficam desencontrados.
 
+---
+
+## Resumo simples
+
+Associação descreve uma relação entre objetos; agregação e composição são formas de relação todo-parte. Na composição, a parte depende mais fortemente do ciclo de vida do todo.
+
 ## 2.16 A classe `Object`: `equals`, `hashCode` e `toString`
 
 **O que é**: `java.lang.Object` é a **raiz** de toda hierarquia: qualquer classe herda, direta ou indiretamente, seus métodos.
@@ -1276,6 +1541,12 @@ System.out.println(new Produto("A1"));                    // Produto{codigo=A1}
 
 **Explicação do exemplo**: os dois `Produto("A1")` são objetos diferentes, mas `equals` os considera iguais e `hashCode` produz o **mesmo** valor, então o `HashSet` guarda só um (`size()` = 1). Se o `hashCode` não tivesse sido sobrescrito, os dois provavelmente cairiam em baldes diferentes e o conjunto teria **2** elementos, mesmo com `equals` correto.
 
+---
+
+## Resumo simples
+
+Object é a classe raiz da hierarquia Java e fornece comportamentos básicos a todos os objetos. equals, hashCode e toString devem ser entendidos e sobrescritos de forma coerente quando necessário.
+
 ## 2.17 Tratamento de exceções
 
 **O que é**: mecanismo para **sinalizar e tratar situações anormais** sem misturá-las ao fluxo normal. Quando algo dá errado, cria-se um objeto **exceção** (um `Throwable`) e **lança-se** (`throw`). A execução do método atual é **interrompida**, e a JVM sobe pela pilha de chamadas procurando um `catch` compatível; se ninguém trata, a *thread* termina e imprime o *stack trace*.
@@ -1284,7 +1555,7 @@ System.out.println(new Produto("A1"));                    // Produto{codigo=A1}
 
 **Como funciona**: a hierarquia:
 
-```
+```text
 Throwable
 ├── Error                (problemas da JVM: OutOfMemoryError, StackOverflowError; não se trata)
 └── Exception
@@ -1330,6 +1601,12 @@ class SaldoInsuficienteException extends Exception {          // checked
 
 **Explicação do exemplo**: ao executar `processar()`, a saída é, em ordem: `abre A`, `abre B`, `usa`, `fecha B`, `fecha A`, `catch: falhou`, `finally`. Note que os recursos são **fechados antes** do `catch` e na ordem **inversa** da abertura, mesmo com a exceção. O `finally` roda por último. A `SaldoInsuficienteException` estende `Exception`, então qualquer método que a lance precisa declará-la com `throws` ou tratá-la.
 
+---
+
+## Resumo simples
+
+Exceções representam situações anormais durante a execução e permitem tratá-las sem misturar erro com o fluxo normal. try, catch, finally, throw e throws ajudam a propagar ou resolver esses casos.
+
 ## 2.18 Pacotes e módulos
 
 **O que é**: **pacotes** (`package`) agrupam classes relacionadas e funcionam como *namespaces*; a estrutura de pastas espelha o nome (`br.com.app.servico` → `br/com/app/servico/`). **Módulos** (JPMS, Java 9) agrupam **vários pacotes** em uma unidade descrita por um arquivo `module-info.java`, que declara de que o módulo depende e o que ele expõe.
@@ -1357,6 +1634,12 @@ module meu.app {
 ```
 
 **Explicação do exemplo**: `requires` declara a dependência; `exports` torna `br.com.app.api` acessível por outros módulos, e tudo que não for exportado fica escondido, mesmo que as classes sejam `public`; `opens ... to` permite que **só** o Jackson use *reflection* nos campos do pacote `modelo`, por exemplo, para serializar JSON.
+
+---
+
+## Resumo simples
+
+Pacotes agrupam tipos e evitam conflitos de nomes. Módulos organizam pacotes e declaram dependências e quais partes ficam disponíveis para outros módulos.
 
 ## 2.19 Classes seladas e pattern matching
 
@@ -1396,13 +1679,19 @@ System.out.println(descrever(new Falha<>("timeout")));    // erro: timeout
 
 ---
 
+---
+
+## Resumo simples
+
+Classes seladas limitam explicitamente quais tipos podem herdá-las. Pattern matching torna mais direto verificar tipos e extrair valores em condições e switch.
+
 # Parte 3: API padrão do Java
 
 ## 3.1 Visão geral do Collections Framework
 
 **O que é**: conjunto de interfaces e classes do pacote `java.util` para **guardar e manipular grupos de objetos** cujo tamanho pode variar (diferente dos arrays, que têm tamanho fixo). Cada **interface** define um *contrato* (o que a estrutura faz) e cada **implementação** escolhe *como* (a estrutura de dados por trás), com custos diferentes. A hierarquia:
 
-```
+```text
 Iterable                         (permite usar o for-each)
 └── Collection
     ├── List    (ordenada, aceita duplicados, acesso por índice)
@@ -1447,6 +1736,12 @@ System.out.println(nomes + " " + unicos.contains(2) + " " + idades.get("Ana"));
 
 **Explicação do exemplo**: as três variáveis são declaradas pelo **tipo da interface** (`List`, `Set`, `Map`) e criadas por uma implementação concreta. Isso significa que trocar `ArrayList` por `LinkedList` mudaria só a linha do `new`. A saída é `[Ana] true 30`.
 
+---
+
+## Resumo simples
+
+Collections Framework reúne interfaces e implementações para armazenar e manipular grupos de objetos. As interfaces definem o comportamento; as implementações oferecem diferentes características de desempenho e ordenação.
+
 ## 3.2 List
 
 **O que é**: coleção **ordenada** (mantém a **ordem de inserção**), que **aceita elementos duplicados** e permite **acesso direto por índice** (a partir de 0). `ArrayList` (array interno que cresce sozinho) é a escolha padrão; `LinkedList` só compensa em uso intenso de inserção/remoção nas pontas (e para isso `ArrayDeque` costuma ser melhor).
@@ -1481,6 +1776,12 @@ nums.remove(Integer.valueOf(10));    // remove o VALOR 10   -> [30]
 
 **Explicação do exemplo**: a lista é criada a partir de `List.of` (que é imutável) dentro de `new ArrayList<>(...)`, produzindo uma cópia **mutável**. Depois de adicionar e ordenar, `removeIf` remove o `"b"` com segurança. Em `nums`, `remove(1)` apaga o elemento da posição 1 (o 20) porque o argumento é `int`; para apagar o *valor* 10 é preciso passar um `Integer`, usando `Integer.valueOf`.
 
+---
+
+## Resumo simples
+
+List é uma coleção ordenada que permite duplicatas e acesso por índice. ArrayList costuma ser a escolha geral quando se precisa guardar uma sequência.
+
 ## 3.3 Set
 
 **O que é**: coleção **sem elementos duplicados** e sem acesso por índice (modela o conjunto matemático). O que conta como "duplicado" depende da implementação: `HashSet` usa `equals`/`hashCode`; `TreeSet` usa `compareTo`/`Comparator`.
@@ -1514,6 +1815,12 @@ System.out.println(a);                       // [2, 3]
 ```
 
 **Explicação do exemplo**: o `TreeSet` descarta o `"java"` repetido e ordena alfabeticamente. `add` devolve `false` ao tentar inserir de novo. Com os números `[10, 20, 30]`, `floor(25)` busca o maior elemento **menor ou igual** a 25 (20) e `ceiling(25)` o menor **maior ou igual** (30). `retainAll` mantém em `a` só o que também está em `b`.
+
+---
+
+## Resumo simples
+
+Set representa um conjunto sem elementos duplicados. A forma de reconhecer duplicatas e manter a ordem depende da implementação escolhida.
 
 ## 3.4 Map
 
@@ -1552,6 +1859,12 @@ System.out.println(grupos);                  // {frutas=[uva, pera]}
 
 **Explicação do exemplo**: `merge` resolve o padrão "contar ocorrências" sem `if`: na primeira vez grava 1; nas seguintes aplica `Integer::sum` ao valor atual e ao novo. A ordem de impressão de um `HashMap` não é garantida (aqui `a`, `b`, `c` é só um resultado típico). `computeIfAbsent` cria a lista na primeira vez que a chave aparece e devolve a lista (existente ou nova), na qual se faz o `add`.
 
+---
+
+## Resumo simples
+
+Map guarda pares de chave e valor, com cada chave aparecendo uma única vez. É útil para encontrar rapidamente um valor a partir de uma chave.
+
 ## 3.5 Queue e Deque
 
 **O que é**: **`Queue`** é uma **fila**, normalmente **FIFO** (*first in, first out*: o primeiro a entrar é o primeiro a sair). **`Deque`** (*double-ended queue*) permite inserir e remover **nas duas pontas**, servindo como fila **e como pilha** (LIFO, *last in, first out*).
@@ -1588,6 +1901,12 @@ System.out.println(pilha.pop());                        // 2  (LIFO)
 ```
 
 **Explicação do exemplo**: na fila comum, `poll` remove `"a"` (o primeiro que entrou) e `peek` mostra o próximo (`"b"`) sem removê-lo. A `PriorityQueue` com `reverseOrder()` trata o **maior** valor como mais prioritário, então `poll` devolve 9, independentemente da ordem de inserção. No `Deque` usado como pilha, `push` coloca na frente e `pop` retira da frente, por isso sai o último inserido (2).
+
+---
+
+## Resumo simples
+
+Queue organiza elementos para processamento em fila, geralmente na ordem de chegada. Deque permite inserir e remover nas duas pontas e também pode funcionar como pilha.
 
 ## 3.6 `Comparable`, `Comparator`, `Iterator` e utilitários
 
@@ -1627,6 +1946,12 @@ System.out.println(ps.size());                    // 1
 
 **Explicação do exemplo**: o `Comparator` ordena primeiro por idade (25 antes de 30) e, em caso de empate, por nome (`Ana` antes de `Bia`), resultando em `Caio Ana Bia`. No laço com `Iterator`, `it.remove()` apaga o último elemento devolvido por `next()` sem causar `ConcurrentModificationException`; restam só as pessoas com idade até 28, ou seja, 1.
 
+---
+
+## Resumo simples
+
+Comparable e Comparator definem regras de ordenação; Iterator percorre elementos de uma coleção. Esses contratos e utilitários ajudam a trabalhar com coleções de forma consistente.
+
 ## 3.7 Números precisos: `BigDecimal`, `BigInteger` e `Math`
 
 **O que é**: `float` e `double` guardam números em **base 2** (ponto flutuante binário, padrão IEEE 754). Muitos decimais comuns, como 0,1, **não têm representação exata** em base 2, então `0.1 + 0.2` resulta em `0.30000000000000004`. **`BigDecimal`** representa números decimais com **precisão arbitrária** e **escala controlada**; **`BigInteger`** representa **inteiros sem limite de tamanho**. Ambos são **imutáveis** (toda operação devolve um novo objeto).
@@ -1664,6 +1989,12 @@ System.out.println(terco);                                 // 0.3333
 ```
 
 **Explicação do exemplo**: o `double` mostra o erro clássico. Com `BigDecimal` criado a partir de String, `19.90 × 3` dá exatamente `59.70`. `2.0` e `2.00` são **numericamente iguais** (`compareTo` = 0), mas `equals` é `false` porque as escalas diferem. A divisão `1/3` exige escala e modo de arredondamento (sem eles lançaria exceção); com 4 casas e `HALF_UP` o resultado é `0.3333`.
+
+---
+
+## Resumo simples
+
+BigDecimal representa decimais com precisão, importante para valores como dinheiro; BigInteger representa inteiros grandes. Math oferece operações matemáticas comuns.
 
 ## 3.8 Generics
 
@@ -1715,6 +2046,12 @@ System.out.println(somar(List.of(1, 2.5, 3L)));      // 6.5
 
 **Explicação do exemplo**: `Caixa<String>` só aceita `String`, e `pegar()` já devolve `String`. `maior` funciona para **qualquer** tipo que seja comparável com ele mesmo (`Integer`, `String`...), porque o limite `Comparable<T>` garante o `compareTo`. `somar` aceita listas de `Integer`, `Double` ou `Long` (`? extends Number`) e apenas **lê** os valores (1 + 2,5 + 3 = 6,5). `preencher` aceita `List<Integer>`, `List<Number>` ou `List<Object>` e só **escreve** `Integer`.
 
+---
+
+## Resumo simples
+
+Generics permitem parametrizar classes e métodos com tipos. Assim, o compilador verifica os tipos usados e reduz casts e erros em tempo de execução.
+
 ## 3.9 Datas e horas (`java.time`)
 
 **O que é**: API moderna (Java 8) para datas e horas, com classes **imutáveis** e *thread-safe*: toda operação (`plusDays`, `withDayOfMonth`) devolve **um novo objeto**. Substitui `Date` e `Calendar`, a API legada, que é **mutável**, tem meses de `Calendar` começando em **0** e nomes enganosos (`Date` guarda também a hora).
@@ -1761,6 +2098,12 @@ System.out.println(sp.withZoneSameInstant(ZoneId.of("Asia/Tokyo")));   // 2026-1
 
 **Explicação do exemplo**: somar um mês a 31/jan não existe em fevereiro, então a API ajusta para o último dia (28/fev). `ChronoUnit.DAYS.between` conta 30 dias inteiros. O `Period` expressa a diferença em anos, meses e dias de calendário (`P6Y5M14D`), enquanto `Duration` expressa 90 minutos como `PT1H30M`. Na conversão de fuso, o **instante é o mesmo**: meio-dia em São Paulo (UTC-3) é 15:00 UTC, que em Tóquio (UTC+9) é **meia-noite do dia seguinte**.
 
+---
+
+## Resumo simples
+
+java.time é a API moderna para datas, horários e intervalos. Suas classes são imutáveis e mais claras para representar conceitos como data, hora, instante e fuso.
+
 ## 3.10 Formatação e internacionalização
 
 **O que é**: adaptar a **exibição e a leitura** de números, moedas, datas e textos às convenções de um idioma/região. O mesmo valor se escreve `1.234,56` no Brasil e `1,234.56` nos EUA.
@@ -1799,6 +2142,12 @@ System.out.println(d.getMonth());                                         // AUG
 ```
 
 **Explicação do exemplo**: o formatador de moeda do `pt-BR` usa o símbolo `R$`, ponto de milhar e vírgula decimal. No segundo exemplo, o `Locale.US` **força** o formato americano, independentemente da configuração da máquina. O mesmo `DateTimeFormatter` serve para escrever uma data (`24/10/2026`) e para **ler** o texto `18/08/2026` de volta como `LocalDate`.
+
+---
+
+## Resumo simples
+
+Formatação e internacionalização adaptam números, datas, moedas e textos às convenções de cada idioma e região. Isso evita apresentar o mesmo valor num formato inadequado ao usuário.
 
 ## 3.11 Expressões regulares (regex)
 
@@ -1845,6 +2194,12 @@ System.out.println("12345".matches("\\d+"));            // true
 
 **Explicação do exemplo**: `matches()` é `false` porque exige que o texto **todo** seja `ddd-dddd`; `find()` procura **dentro** do texto e acha `123-4567` (o `reset()` reinicia o *matcher*). `group(2)` é o segundo par de parênteses (os quatro dígitos finais). `\d+` casa uma sequência de dígitos, e `replaceAll` troca cada sequência por `#`.
 
+---
+
+## Resumo simples
+
+Regex descreve padrões que podem ser encontrados ou validados em textos. Pattern compila a expressão e Matcher a aplica a uma sequência de caracteres.
+
 ## 3.12 Arquivos e I/O clássico (`java.io`)
 
 **O que é**: leitura e escrita de dados por meio de **fluxos** (*streams*): um canal por onde os dados passam em sequência, sem se carregar tudo em memória. Há dois grupos: **fluxos de bytes** (`InputStream`/`OutputStream`, para dados binários como imagens e ZIPs) e **fluxos de caracteres** (`Reader`/`Writer`, para texto, que fazem a conversão entre bytes e caracteres usando um *charset*).
@@ -1886,6 +2241,12 @@ try (BufferedReader br = new BufferedReader(new FileReader("saida.txt"))) {
 
 **Explicação do exemplo**: o primeiro bloco abre `saida.txt` em modo *append*, escreve duas linhas e fecha o arquivo automaticamente (*try-with-resources* também descarrega o *buffer*). O segundo bloco lê o arquivo linha a linha: `readLine()` devolve `null` ao chegar ao fim, o que encerra o `while`. A saída é `linha 1` e `linha 2`. Executar o programa mais uma vez acrescentaria **mais** duas linhas, por causa do `true` do *append*.
 
+---
+
+## Resumo simples
+
+[java.io](http://java.io) lê e grava dados por fluxos de bytes ou de caracteres. A escolha depende de estar trabalhando com dados binários ou texto.
+
 ## 3.13 NIO.2 (`java.nio.file`)
 
 **O que é**: API moderna de arquivos (Java 7). **`Path`** descreve um **caminho** (criado por `Path.of(...)`, Java 11, ou `Paths.get(...)`) e **`Files`** executa as **operações** (criar, copiar, ler, listar). A velha `File` misturava as duas coisas e tratava mal erros e atributos.
@@ -1920,6 +2281,12 @@ Files.copy(arq, dir.resolve("b.txt"), StandardCopyOption.REPLACE_EXISTING);
 ```
 
 **Explicação do exemplo**: `createDirectories` monta a pasta e os pais de uma vez. `resolve` concatena sem tocar o disco. `writeString` cria o arquivo e `readAllLines` o lê de volta (2 linhas). O `Files.walk` percorre `dados` recursivamente; o `Stream` está em *try-with-resources* para liberar a pasta. O `copy` só sobrescreve `b.txt` se já existir graças ao `REPLACE_EXISTING`.
+
+---
+
+## Resumo simples
+
+NIO.2 oferece Path para representar caminhos e Files para operar sobre arquivos e diretórios. É a API moderna para navegar, ler e alterar o sistema de arquivos.
 
 ## 3.14 Serialização
 
@@ -1958,6 +2325,12 @@ try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(arq))) {
 
 **Explicação do exemplo**: o objeto é gravado em bytes e relido como uma **cópia**. Como `senha` é `transient`, não foi gravada e volta `null`, então a saída é `Ana null`. O construtor de `Aluno` **não** é executado na leitura: o estado vem dos bytes.
 
+---
+
+## Resumo simples
+
+Serialização converte o estado de objetos em bytes para armazenamento ou transferência e permite reconstruí-los depois. É preciso considerar compatibilidade e segurança ao ler dados serializados.
+
 ## 3.15 Reflection
 
 **O que é**: capacidade de **inspecionar e manipular classes, atributos, métodos e construtores em tempo de execução**, mesmo sem conhecê-los em tempo de compilação. O ponto de partida é um objeto **`Class<?>`**, obtido por `objeto.getClass()`, `Pessoa.class` ou `Class.forName("br.com.Pessoa")`.
@@ -1991,6 +2364,12 @@ System.out.println(m.invoke(p));                                           // An
 ```
 
 **Explicação do exemplo**: sem escrever `new Pessoa(...)` nem `p.getNome()` no código, o programa descobre o campo `nome` pelo nome e pelo tipo, **cria** um objeto procurando o construtor que recebe `String`, e **invoca** `getNome` pelo nome. É exatamente assim que um framework consegue trabalhar com classes que nunca viu em compilação.
+
+---
+
+## Resumo simples
+
+Reflection permite inspecionar e acessar tipos, campos, métodos e construtores durante a execução. Frameworks usam essa capacidade para descobrir componentes sem conhecê-los diretamente antes da compilação.
 
 ## 3.16 Annotations e Annotation Processing
 
@@ -2027,6 +2406,12 @@ if (m.isAnnotationPresent(Auditar.class)) {
 
 **Explicação do exemplo**: `@Retention(RUNTIME)` mantém a anotação disponível quando o programa roda; sem ela (padrão `CLASS`), a leitura por reflection devolveria `null`. `@Target(METHOD)` impede usá-la em outros lugares. O código lê, por reflection, o elemento `motivo` e imprime `saque`: é o mecanismo pelo qual frameworks decidem o que fazer com `@Transactional`, `@GetMapping` etc.
 
+---
+
+## Resumo simples
+
+Annotations são metadados escritos no código para ferramentas, compiladores e frameworks. Annotation processing pode examiná-las na compilação e gerar código.
+
 ## 3.17 Logging
 
 **O que é**: **registrar eventos** da aplicação (diagnóstico, auditoria, erros) em um destino (console, arquivo, serviço de logs), com **níveis de severidade** e **formato** configuráveis, no lugar de `System.out.println` e `e.printStackTrace()`.
@@ -2059,6 +2444,12 @@ void salvar(Pedido p) {
 ```
 
 **Explicação do exemplo**: o `Logger` é um campo `static final`, um por classe, e carrega o nome da classe nas mensagens. `{}` é preenchido apenas se o nível `INFO` estiver ativo. No `catch`, passar `e` como último argumento registra o *stack trace* completo. **Atenção**: logar **e** relançar a mesma exceção em várias camadas duplica o erro no log; escolha a camada responsável por registrá-lo (normalmente a mais externa, como um tratador global).
+
+---
+
+## Resumo simples
+
+Logging registra eventos da aplicação com níveis e destinos configuráveis. Ajuda a diagnosticar problemas e acompanhar o comportamento do sistema.
 
 ## 3.18 Outras classes utilitárias importantes
 
@@ -2094,7 +2485,15 @@ System.out.println(props.getProperty("porta", "8080"));          // valor ou pad
 
 **Explicação do exemplo**: `requireNonNull` interrompe cedo, com uma mensagem que diz **qual** argumento era nulo. O `nanoTime` é usado para medir a duração (subtração de dois instantes), nunca para "que horas são". `getProperty("porta", "8080")` devolve o valor do arquivo ou o padrão se a chave não existir.
 
-## 3.13 NIO.2 (`java.nio.file`)
+> ⚠️ **REVISAR (pendente de aprovação)**: os tópicos 3.13B a 3.18B abaixo são uma segunda versão dos tópicos 3.13 a 3.18 acima (mesmos assuntos, redação diferente; cada versão tem detalhes que a outra não tem). Nada foi removido nem mesclado. Decidir: manter A, manter B ou mesclar. Apagar esta nota depois da decisão.
+
+---
+
+## Resumo simples
+
+A biblioteca padrão inclui classes utilitárias para tarefas recorrentes, como manipular objetos, gerar valores ou trabalhar com estruturas comuns. Elas evitam reimplementar soluções simples.
+
+## 3.13B NIO.2 (`java.nio.file`)
 
 **O que é**: API moderna de arquivos (Java 7) que separa as responsabilidades que `File` misturava: **`Path`** descreve **caminhos** e **`Files`** executa as **operações**. (Não confundir com o *NIO* original, `java.nio`, de *buffers*, *channels* e *selectors*, usado em I/O não bloqueante de alto desempenho.)
 
@@ -2130,7 +2529,15 @@ try (Stream<Path> s = Files.walk(Path.of("dados"))) {   // recursivo; fecha o re
 
 **Explicação do exemplo**: `resolve` monta o caminho sem tocar o disco; `writeString` cria o arquivo e `readAllLines` o lê de volta, separando por linha. `copy` precisa de `REPLACE_EXISTING` para não lançar `FileAlreadyExistsException` se `b.txt` já existir. `Files.walk` percorre `dados` recursivamente e devolve uma `Stream`, que é filtrada pelos `.txt`; como a stream mantém recursos abertos, ela é fechada no *try-with-resources*.
 
-## 3.14 Serialização
+---
+
+## Resumo simples
+
+> **Pendente de revisão:** esta seção está marcada como possível duplicata no material de origem. Foi preservada para sua avaliação.
+
+Esta seção retoma NIO.2: Path representa caminhos e Files executa operações nos arquivos. Ela está marcada como possível duplicata da seção 3.13 e fica preservada para sua revisão.
+
+## 3.14B Serialização
 
 **O que é**: transformar o **estado de um objeto** em uma sequência de **bytes** (`ObjectOutputStream.writeObject`) e reconstruí-lo depois (`ObjectInputStream.readObject`), podendo gravá-lo em disco, enviá-lo pela rede ou guardá-lo em cache. A classe precisa implementar a interface marcadora **`Serializable`** (sem métodos: só autoriza).
 
@@ -2168,7 +2575,15 @@ try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(arq))) {
 
 **Explicação do exemplo**: o objeto `Aluno` é gravado em `aluno.ser` e relido. Como `senha` é `transient`, **não foi gravada**, e o objeto lido tem `senha == null`; só `nome` sobreviveu. O `serialVersionUID` fixo garante que a classe continue lendo arquivos antigos mesmo após mudanças compatíveis. Note que, na leitura, o construtor `Aluno(...)` **não** é executado.
 
-## 3.15 Reflection (reflexão)
+---
+
+## Resumo simples
+
+> **Pendente de revisão:** esta seção está marcada como possível duplicata no material de origem. Foi preservada para sua avaliação.
+
+Esta seção retoma serialização: converter objetos em bytes e reconstruí-los depois. Ela está marcada como possível duplicata da seção 3.14 e fica preservada para sua revisão.
+
+## 3.15B Reflection (reflexão)
 
 **O que é**: capacidade de **inspecionar e manipular classes, métodos, campos e construtores em tempo de execução**, mesmo sem conhecê-los na compilação. O ponto de entrada é a classe `Class<?>`, obtida por `objeto.getClass()`, `Pessoa.class` ou `Class.forName("br.com.Pessoa")`.
 
@@ -2201,7 +2616,15 @@ System.out.println(m.invoke(p));                                           // An
 
 **Explicação do exemplo**: o programa descobre os campos de `Pessoa` em execução e imprime `nome : String`. Depois obtém o construtor que recebe uma `String`, cria uma instância **sem escrever `new Pessoa(...)`**, localiza o método `getNome` pelo nome e o invoca sobre o objeto criado, imprimindo `Ana`. É exatamente o que um framework faz para criar seus objetos a partir de configuração.
 
-## 3.16 Annotations e *annotation processing*
+---
+
+## Resumo simples
+
+> **Pendente de revisão:** esta seção está marcada como possível duplicata no material de origem. Foi preservada para sua avaliação.
+
+Reflection permite descobrir e manipular tipos durante a execução, mesmo sem conhecê-los antes da compilação. Esta seção está marcada como possível duplicata da seção 3.15 e fica preservada para sua revisão.
+
+## 3.16B Annotations e *annotation processing*
 
 **O que é**: **anotações** são **metadados** colocados no código (`@Nome`) que não alteram diretamente a lógica, mas podem ser lidos por compilador, ferramentas e frameworks. Declaram-se com `@interface`.
 
@@ -2236,7 +2659,15 @@ if (m.isAnnotationPresent(Auditar.class)) {
 
 **Explicação do exemplo**: `@Retention(RUNTIME)` mantém a anotação disponível depois da compilação; sem isso, `isAnnotationPresent` devolveria `false`. `@Target(METHOD)` faz o compilador recusar `@Auditar` em uma classe. O código usa *reflection* para ler o elemento `motivo` e imprime `saque`: é o mesmo mecanismo pelo qual frameworks leem `@GetMapping("/x")`.
 
-## 3.17 Logging
+---
+
+## Resumo simples
+
+> **Pendente de revisão:** esta seção está marcada como possível duplicata no material de origem. Foi preservada para sua avaliação.
+
+Annotations registram metadados no código, e processadores podem analisá-los ou gerar código durante a compilação. Esta seção está marcada como possível duplicata da seção 3.16 e fica preservada para sua revisão.
+
+## 3.17B Logging
 
 **O que é**: registrar eventos da aplicação (diagnóstico, auditoria, erros) em **níveis** de severidade e para **destinos** configuráveis (console, arquivo, serviço de logs), em vez de usar `System.out.println` e `printStackTrace()`.
 
@@ -2268,7 +2699,15 @@ void salvar(Pedido p) {
 
 **Explicação do exemplo**: o `{}` é substituído pelo valor, sem concatenar texto manualmente. No `catch`, passar `e` como último argumento faz o *stack trace* completo aparecer no log. Aqui ocorre log **e** relançamento apenas para fins de demonstração; em um sistema real, escolha **um** ponto (normalmente a camada que trata a exceção, como um `@RestControllerAdvice`) para registrar.
 
-## 3.18 Classes utilitárias úteis
+---
+
+## Resumo simples
+
+> **Pendente de revisão:** esta seção está marcada como possível duplicata no material de origem. Foi preservada para sua avaliação.
+
+Logging registra eventos com níveis de severidade e destinos configuráveis. Esta seção está marcada como possível duplicata da seção 3.17 e fica preservada para sua revisão.
+
+## 3.18B Classes utilitárias úteis
 
 **O que é**: classes pequenas e muito usadas da biblioteca padrão, que resolvem tarefas recorrentes.
 
@@ -2304,6 +2743,14 @@ long ms = (System.nanoTime() - t0) / 1_000_000;             // duração em mili
 
 ---
 
+---
+
+## Resumo simples
+
+> **Pendente de revisão:** esta seção está marcada como possível duplicata no material de origem. Foi preservada para sua avaliação.
+
+Classes utilitárias resolvem tarefas comuns usando a biblioteca padrão. Esta seção está marcada como possível duplicata da seção 3.18 e fica preservada para sua revisão.
+
 # Parte 4: Java avançado
 
 ## 4.1 Lambdas e interfaces funcionais
@@ -2314,7 +2761,7 @@ long ms = (System.nanoTime() - t0) / 1_000_000;             // duração em mili
 
 **Como funciona**:
 
-```
+```text
 (a, b) -> a + b                          // expressão: o resultado é devolvido sem 'return'
 s -> s.length()                          // um parâmetro: parênteses opcionais
 () -> new ArrayList<String>()            // sem parâmetros
@@ -2373,6 +2820,12 @@ System.out.println(longo.and(comecaComJ).test("java"));   // true
 
 **Explicação do exemplo**: `filtrar` não sabe **o que** filtrar: a regra chega como um `Predicate`, e a lambda `n -> n % 2 == 0` mantém só os pares. O mesmo método serviria para Strings, objetos etc. (por ser genérico). Em `andThen`, o resultado do primeiro (10) alimenta o segundo (11); em `compose`, a ordem se inverte (primeiro `maisUm`, depois `dobro`, dando 12). `and` combina dois predicados: `"java"` tem mais de 3 letras **e** começa com "j".
 
+---
+
+## Resumo simples
+
+Interfaces funcionais têm exatamente um método abstrato e podem ser representadas por lambdas. Lambdas permitem passar comportamentos como valores, por exemplo para uma operação ou callback.
+
 ## 4.2 Method references
 
 **O que é**: um atalho com `::` para uma lambda que **apenas chama um método já existente**. Não muda o comportamento, só remove o ruído de "declarar um parâmetro para repassá-lo". `s -> s.length()` vira `String::length`.
@@ -2404,6 +2857,12 @@ System.out.println(converter.apply("42") + novaLista.get().size());   // 42 + 0 
 ```
 
 **Explicação do exemplo**: `String::compareTo` equivale a `(a, b) -> a.compareTo(b)`: o primeiro argumento é quem recebe a chamada, e o segundo é o parâmetro do método. `System.out::println` captura o objeto `System.out` e chama `println` para cada elemento. `Integer::parseInt` é estático, e `ArrayList::new` cria uma lista nova a cada `get()`. A soma final (`42 + 0`) mostra que `novaLista.get().size()` é 0.
+
+---
+
+## Resumo simples
+
+Method reference é uma forma curta de escrever uma lambda que apenas chama um método existente. O operador :: indica qual método será usado.
 
 ## 4.3 Optional
 
@@ -2440,6 +2899,12 @@ try {
 ```
 
 **Explicação do exemplo**: `buscarNome` deixa claro, **no tipo de retorno**, que pode não haver resultado. Com id 1, o `map` transforma o valor e `orElse` é ignorado; com id 2, o `Optional` está vazio, o `map` não faz nada e `orElse` entrega `"DESCONHECIDO"`. `ifPresent` só executa quando há valor. `orElseThrow` converte a ausência em exceção, para os casos em que não achar é um erro.
+
+---
+
+## Resumo simples
+
+Optional representa explicitamente um valor que pode estar presente ou ausente. Ajuda APIs a comunicarem a possibilidade de falta de resultado sem recorrer diretamente a null.
 
 ## 4.4 Streams
 
@@ -2483,6 +2948,12 @@ double media = livros.stream().mapToDouble(Livro::preco).average().orElse(0);   
 ```
 
 **Explicação do exemplo**: a primeira stream mostra a **preguiça**. As saídas intermediárias são `filter a`, `filter bb`, `map bb`, `filter ccc`, `map ccc`: cada elemento passa por todo o *pipeline* antes do próximo; `"a"` é barrado no filtro; assim que `limit(2)` recebe `"BB"` e `"CCC"`, a stream **para**, e `"dd"` nem é visitado (curto-circuito). O resultado é `[BB, CCC]`. No segundo trecho, `groupingBy` agrupa os livros pela categoria e `counting()` conta cada grupo; `mapToDouble(...).average()` calcula a média dos preços (10 + 30 + 20) / 3 = 20.0, e `orElse(0)` cobre o caso de lista vazia.
+
+---
+
+## Resumo simples
+
+Streams descrevem um fluxo de operações para filtrar, transformar e combinar elementos. O pipeline processa dados de forma declarativa e normalmente só é executado quando há uma operação terminal.
 
 ## 4.5 Concorrência: threads, sincronização e coleções concorrentes
 
@@ -2549,6 +3020,12 @@ System.out.println(fila.take());                     // consumidor (bloqueia se 
 
 **Explicação do exemplo**: duas threads executam 10.000 incrementos cada. Com `synchronized` (ou com `AtomicInteger`), nenhum incremento se perde, e o resultado é sempre **20000**. Sem proteção, `n++` (ler, somar, gravar) seria intercalado entre as threads e o resultado ficaria **menor e diferente a cada execução**. O `join()` impede que o `main` leia o valor antes de as threads terminarem. A fila bloqueante mostra a troca de dados entre threads sem `wait/notify` manual.
 
+---
+
+## Resumo simples
+
+Concorrência organiza tarefas que podem avançar ao mesmo tempo ou intercaladas. Como threads compartilham memória, sincronização e coleções concorrentes ajudam a evitar conflitos.
+
 ## 4.6 Executors, `Future` e `CompletableFuture`
 
 **O que é**: criar uma `Thread` por tarefa é **caro** (memória, criação) e não escala. Um **`ExecutorService`** mantém um **pool de threads reutilizáveis**: você envia **tarefas** e o pool as executa, sem você gerenciar threads.
@@ -2610,6 +3087,12 @@ CompletableFuture.supplyAsync(() -> "dado")
 
 **Explicação do exemplo**: o `submit` envia um `Callable` ao pool e devolve um `Future`; `get` espera o resultado (42) por até 2 segundos. Na segunda parte, **todas** as buscas de preço começam antes de qualquer `join`, de modo que rodam em paralelo; o tempo total é o da **mais lenta**, não a soma. Na terceira, cada `then...` é uma etapa que executa quando a anterior termina, sem bloquear a thread principal; `exceptionally` captura falhas de qualquer etapa anterior e o `join()` final apenas espera para o programa não terminar antes.
 
+---
+
+## Resumo simples
+
+Executors gerenciam a execução de tarefas em pools de threads. Future representa um resultado que chegará depois, e CompletableFuture facilita combinar operações assíncronas.
+
 ## 4.7 Threads virtuais (Java 21)
 
 **O que é**: threads **leves**, gerenciadas pela **JVM**, e não mapeadas 1:1 para threads do sistema operacional (recurso final no Java 21, JEP 444). Uma thread virtual roda **"montada"** em uma *thread de plataforma* (a *carrier thread*); quando **bloqueia** em I/O (rede, banco, `sleep`), a JVM a **desmonta**, libera a *carrier* para outra thread virtual e a remonta quando o I/O termina.
@@ -2640,6 +3123,12 @@ try (var ex = Executors.newVirtualThreadPerTaskExecutor()) {
 ```
 
 **Explicação do exemplo**: são criadas **10.000** threads virtuais, cada uma dormindo 1 segundo. Como o `sleep` apenas **desmonta** a thread virtual, bastam poucas *carrier threads* para atender todas, e o conjunto termina em cerca de **1 segundo**. Com 10.000 threads de plataforma isso consumiria muita memória (cada uma reserva uma pilha) e seria bem mais lento. O `try-with-resources` fecha o executor e espera as tarefas.
+
+---
+
+## Resumo simples
+
+Threads virtuais são threads leves gerenciadas pela JVM, adequadas a muitas tarefas que passam tempo aguardando I/O. Elas permitem lidar com alta concorrência sem criar uma thread de sistema operacional para cada tarefa.
 
 ## 4.8 Gerenciamento de memória e *Garbage Collector*
 
@@ -2683,6 +3172,12 @@ System.out.println(usadoMb + " MB em uso, máximo " + rt.maxMemory() / 1_048_576
 **Explicação do exemplo**: o mapa `static` mantém **referência forte** a cada `byte[]` inserido; como o próprio mapa é alcançável durante toda a execução, o GC **nunca** pode liberar esses arrays, e o programa acaba com `OutOfMemoryError`. Um `LinkedHashMap` em modo de acesso, com `removeEldestEntry`, vira um *cache LRU* de tamanho limitado: ao passar de 100 entradas, a menos usada é removida e pode ser coletada. As últimas linhas mostram, via `Runtime`, a memória atualmente em uso e o limite do heap (`-Xmx`).
 
 ---
+
+---
+
+## Resumo simples
+
+A JVM libera automaticamente objetos que já não podem ser alcançados pelo programa. O Garbage Collector realiza esse trabalho e oferece diferentes estratégias para equilibrar pausas e desempenho.
 
 # Parte 5: Persistência e qualidade
 
@@ -2743,6 +3238,12 @@ WHERE a.name LIKE '%Nar%';
 
 **Explicação do exemplo**: a tabela `anime` referencia `producer` por chave estrangeira, o que impede cadastrar um anime com estúdio inexistente. A consulta liga as duas tabelas com `INNER JOIN` pela correspondência `producer_id = id` e devolve só os animes cujo nome contém "Nar", junto com o nome do estúdio. Sem o `ON`, o resultado seria o produto cartesiano das duas tabelas.
 
+---
+
+## Resumo simples
+
+Bancos de dados guardam dados de forma persistente; um SGBD permite consultá-los e alterá-los com controle. Conceitos como tabelas, chaves, transações e índices ajudam a entender as tecnologias de persistência.
+
 ## 5.2 JDBC (*Java Database Connectivity*)
 
 **O que é**: a API padrão do Java (`java.sql`) para conversar com **bancos relacionais**. Um **driver** (`mysql-connector-j`, `postgresql`) implementa as interfaces `Connection`, `Statement`, `PreparedStatement` e `ResultSet` para cada banco; seu código usa só as interfaces, então trocar de banco é, em tese, trocar o driver e a URL. Desde o JDBC 4, o driver presente no *classpath* é registrado automaticamente (não precisa de `Class.forName`).
@@ -2800,6 +3301,12 @@ try (Connection conn = dataSource.getConnection();
 
 **Explicação do exemplo**: na primeira parte, três inserções são enviadas em **lote** e confirmadas **juntas** em uma transação: se qualquer uma falhar, o `rollback` desfaz todas, mantendo o banco consistente (atomicidade). O `PreparedStatement` é reutilizado, trocando apenas o parâmetro. Na segunda, a consulta usa `?` para o valor do `LIKE` (seguro contra *SQL Injection*) e percorre o `ResultSet` com `next()`; os três recursos são fechados automaticamente, na ordem inversa da abertura.
 
+---
+
+## Resumo simples
+
+JDBC é a API padrão do Java para conectar-se a bancos relacionais e executar comandos SQL. Drivers implementam as interfaces usadas pelo programa para conversar com cada banco.
+
 ## 5.3 JPA e Hibernate (ORM)
 
 **O que é**: **ORM** (*Object-Relational Mapping*) é a técnica de **mapear classes para tabelas** e gerar o SQL automaticamente. **JPA** (*Jakarta Persistence*, antes *Java Persistence API*) é a **especificação**; **Hibernate** é a implementação mais usada. O **`EntityManager`** gerencia o ciclo de vida das **entidades** dentro de um **contexto de persistência** (um cache de primeiro nível ligado à transação).
@@ -2853,6 +3360,12 @@ q.setParameter("c", "Ana");                      // evita o N+1 ao carregar os i
 ```
 
 **Explicação do exemplo**: a entidade tem construtor protegido sem argumentos (exigência do JPA) e a lista de itens com `cascade = ALL`: salvar o pedido salva também seus itens. No método `renomear`, a entidade lida dentro da transação é **gerenciada**; ao mudar o nome, o Hibernate percebe a diferença e executa o `UPDATE` no *commit*, sem nenhuma chamada de gravação. A consulta usa `join fetch` para trazer **pedido e itens em um único SQL**, evitando o problema N+1; o `:c` é um parâmetro nomeado (seguro contra *SQL Injection*).
+
+---
+
+## Resumo simples
+
+ORM relaciona objetos Java a tabelas e linhas de um banco. JPA define a especificação de persistência e Hibernate é uma implementação popular dela.
 
 ## 5.4 Ferramentas de build, dependências e Lombok
 
@@ -2926,7 +3439,7 @@ dependencies {
 
 **Explicação do exemplo**: as duas configurações declaram o mesmo: o *starter* web (versão controlada pelo BOM do Spring Boot, por isso sem `<version>`), o driver do MySQL só para a execução (`runtime`/`runtimeOnly`) e o *starter* de testes apenas nos testes. No Gradle, o Lombok é `compileOnly` (não vai no pacote final) **e** `annotationProcessor` (para o `javac` executá-lo). O `clean package` do Maven percorre as fases até `package`, rodando os testes no caminho.
 
-### Aprofundamento: `pom.xml`, `build.gradle`, ciclo de vida, plugins e *wrappers*
+### 5.4.1 Aprofundamento: `pom.xml`, `build.gradle`, ciclo de vida, plugins e *wrappers*
 
 **O que é**: detalhamento do que foi visto acima sobre Maven e Gradle: a **anatomia** dos arquivos de configuração, o que acontece em cada etapa do build, como os **plugins** entram no processo e como os ***wrappers*** garantem que todo mundo use a mesma versão da ferramenta.
 
@@ -3076,6 +3589,12 @@ mvn wrapper:wrapper                      # gera mvnw, mvnw.cmd e .mvn/wrapper/ (
 
 **Explicação do exemplo**: o `<parent>` fornece o BOM e os padrões, então as dependências do Spring ficam **sem versão**. A exclusão troca o Logback pelo Log4j2 (remove a transitiva e declara a nova). O Failsafe liga seus *goals* à fase `integration-test`, e o perfil `rapido` só existe quando pedido com `-P`. No Gradle, o `settings.gradle` nomeia o projeto, o plugin `dependency-management` cumpre o papel do `parent` e o catálogo `libs.versions.toml` guarda a versão do MapStruct em um lugar só. Nos comandos, o `mvn wrapper:wrapper` é executado **uma vez** (com o Maven instalado) para criar o *wrapper*; depois disso, todos usam `./mvnw` e a versão do Maven vem do `maven-wrapper.properties`. (Os números de versão são ilustrativos: use sempre as atuais.)
 
+---
+
+## Resumo simples
+
+Maven e Gradle automatizam compilação, testes, empacotamento e obtenção de dependências. Lombok reduz código repetitivo gerando membros a partir de anotações.
+
 ## 5.5 Testes automatizados
 
 **O que é**: código que **verifica automaticamente** se o sistema se comporta como esperado, executado a cada mudança. Dá confiança para **refatorar** e funciona como **documentação executável** do comportamento.
@@ -3133,7 +3652,7 @@ class PedidoServiceTest {
 
 **Explicação do exemplo**: o `PedidoRepository` é substituído por um *mock* configurado para devolver `Optional.empty()`, de modo que o teste **não precisa de banco**. O `assertThrows` executa o código e exige que lance `NaoEncontradoException`; a exceção capturada permite conferir a mensagem. O `verify` garante que o serviço realmente consultou o repositório com o id esperado. O teste parametrizado executa o mesmo cenário três vezes, uma para cada idade da lista.
 
-### Aprofundamento: recursos avançados de JUnit 5 e Mockito, e testes de concorrência
+### 5.5.1 Aprofundamento: recursos avançados de JUnit 5 e Mockito, e testes de concorrência
 
 **O que é**: complemento do que foi visto acima: recursos do **JUnit 5** e do **Mockito** que resolvem situações comuns do dia a dia (tempo limite, repetição, ordem de chamadas, métodos estáticos) e a técnica para testar **código concorrente**, que é o tipo de teste mais difícil de escrever, porque o resultado depende da ordem em que as *threads* são escalonadas.
 
@@ -3230,6 +3749,12 @@ class TransferenciaServiceTest {
 ```
 
 **Explicação do exemplo**: o primeiro teste cria 8 *threads* que ficam bloqueadas no `largada.await()`; o `countDown()` as libera juntas, o que maximiza a chance de conflito. O `f.get(5, SECONDS)` espera cada uma e **relança** qualquer exceção ocorrida nelas; no fim, a asserção confere que **todos os 80.000 incrementos** foram contados. Trocar `AtomicInteger` por um `int` comum faria o teste falhar de forma intermitente: é justamente para isso que ele é repetido 5 vezes e limitado a 10 segundos. O segundo teste usa o estilo BDD do Mockito e o `InOrder` para garantir a **ordem** das interações; como `registrar` recebe dois argumentos e um deles usa `eq`, o outro também precisa de *matcher* (`anyLong()`).
+
+---
+
+## Resumo simples
+
+Testes automatizados verificam se o programa continua se comportando como esperado após mudanças. Testes em diferentes níveis equilibram rapidez, isolamento e confiança na integração.
 
 ## 5.6 Concorrência e transações com JPA (`@Version`)
 
@@ -3336,6 +3861,12 @@ class SaqueFacade {                                       // SEM @Transactional:
 
 ---
 
+---
+
+## Resumo simples
+
+Quando transações alteram o mesmo registro, uma pode sobrescrever a outra sem perceber. O JPA oferece controle otimista com @Version e bloqueio pessimista para proteger essas atualizações.
+
 # Parte 6: Arquitetura e boas práticas
 
 ## 6.1 Princípios SOLID
@@ -3391,6 +3922,12 @@ System.out.println(new Pedido(new DescontoRegular()).total(100));  // 95.0
 
 **Explicação do exemplo**: na versão "antes", incluir o tipo `PREMIUM` obriga a **modificar** o método, arriscando quebrar os existentes. Na versão "depois", basta **criar uma nova classe** `DescontoPremium` (extensão), sem tocar em `Pedido` (fechado para modificação). `Pedido` depende de `RegraDesconto` (abstração) e **recebe** a regra pelo construtor, o que também permite testá-lo com uma regra falsa. Com a regra VIP, 100 − 20 = 80.0; com a regular, 100 − 5 = 95.0.
 
+---
+
+## Resumo simples
+
+SOLID reúne cinco princípios que orientam a organização de código orientado a objetos. Eles ajudam a reduzir dependências rígidas e facilitam mudanças e testes.
+
 ## 6.2 Clean Code e boas práticas de código
 
 **O que é**: um conjunto de práticas para escrever código **legível, simples e fácil de mudar** (termo popularizado pelo livro *Clean Code*, de Robert C. Martin). A premissa: o código é **lido muito mais vezes do que escrito**, então o custo real está em entendê-lo e modificá-lo.
@@ -3431,13 +3968,19 @@ void liberarAcesso(Usuario usuario) {
 
 **Explicação do exemplo**: as três condições aninhadas viraram **cláusulas de guarda**: cada uma elimina um caso inválido e retorna, deixando o "caminho feliz" no fim, sem recuo. Os nomes (`isMaiorDeIdade`, `estaAtivo`) dizem **o que** é testado, e o `3` ganhou nome. O comportamento é o mesmo, mas o código se lê quase como uma frase.
 
+---
+
+## Resumo simples
+
+Clean Code reúne práticas para tornar o código legível e simples de manter. Bons nomes, funções claras e responsabilidades bem delimitadas ajudam quem precisa entendê-lo depois.
+
 ## 6.3 Padrões de projeto criacionais
 
 **O que é**: **padrões de projeto** (*design patterns*, catalogados pelo livro do GoF, "Gang of Four") são **soluções nomeadas e reaproveitáveis** para problemas recorrentes de design, descrevendo **intenção, estrutura e consequências**; não são bibliotecas nem código pronto. Dividem-se em **criacionais** (como **criar** objetos), **estruturais** (como **compor** classes e objetos) e **comportamentais** (como objetos **se comunicam**). Este tópico trata dos criacionais.
 
 **Para que serve**: dar um vocabulário comum à equipe ("use um *Strategy* aqui"), reaproveitar soluções comprovadas e **desacoplar** o código que usa um objeto do código que o cria.
 
-### Singleton
+### 6.3.1 Singleton
 
 **O que é**: garante **uma única instância** da classe e um ponto global de acesso: construtor `private`, atributo estático e `getInstance()`.
 
@@ -3462,7 +4005,7 @@ System.out.println(Config.getInstance() == Config.getInstance());   // true
 
 **Explicação**: a classe `Holder` só é carregada na **primeira chamada** a `getInstance()` (preguiça), e a JVM garante que o carregamento de uma classe é *thread-safe*; por isso não há `synchronized`. As duas chamadas devolvem o **mesmo** objeto.
 
-### Builder
+### 6.3.2 Builder
 
 **O que é**: separa a **construção** de um objeto complexo da sua representação, montando-o **passo a passo** por uma interface **fluente** (cada método devolve `this`) e terminando com `build()`.
 
@@ -3494,7 +4037,7 @@ Pessoa p = Pessoa.builder().nome("Ana").email("ana@x.com").idade(30).build();
 
 **Explicação**: cada chamada configura um campo do *builder* e devolve o próprio *builder*, o que permite o encadeamento legível; os argumentos são **nomeados** pelos métodos (sem ordem de parâmetros para decorar). `build()` valida (sem nome, lança exceção) e cria a `Pessoa` com campos `final`.
 
-### Factory (Simple Factory / Factory Method)
+### 6.3.3 Factory (Simple Factory / Factory Method)
 
 **O que é**: encapsula **qual classe concreta instanciar**; o cliente conhece só a **interface**. Variantes: a **fábrica estática/Simple Factory** (um método estático que escolhe a implementação, como no exemplo) e o **Factory Method** do GoF (um método na classe-base que as **subclasses sobrescrevem** para decidir o tipo criado). Há ainda o **Abstract Factory** (cria **famílias** de objetos relacionados) e o **Prototype** (cria por **clonagem** de um modelo).
 
@@ -3516,6 +4059,12 @@ System.out.println(criar(Pais.BRASIL).simbolo());   // R$
 ```
 
 **Explicação**: quem chama `criar` recebe uma `Moeda` e **não conhece** `Real` nem `Dolar`. Se um dia entrar `Pais.JAPAO`, este `switch` **deixa de compilar** até que o novo caso seja tratado, apontando o ponto exato a corrigir.
+
+---
+
+## Resumo simples
+
+Padrões criacionais organizam a criação de objetos e escondem detalhes de instanciação. Eles oferecem soluções nomeadas para cenários recorrentes, como Singleton, Builder e Factory.
 
 ## 6.4 Padrões de projeto estruturais
 
@@ -3552,6 +4101,12 @@ new MigracaoFacade(cepApi, crm).migrarCliente("Venilton", "14801788");
 ```
 
 **Explicação do exemplo**: quem usa a fachada chama **um único método** com dois dados e não precisa saber que, por trás, é preciso consultar a cidade e o estado em uma API de CEP e depois gravar tudo no CRM. Se o CRM mudar, só a fachada é alterada. As dependências entram pelo construtor, o que facilita testá-la com *mocks*.
+
+---
+
+## Resumo simples
+
+Padrões estruturais mostram formas de combinar classes e objetos em estruturas maiores. Eles ajudam a integrar componentes e acrescentar capacidades com menos dependência.
 
 ## 6.5 Padrões de projeto comportamentais
 
@@ -3590,6 +4145,12 @@ r.mover();                                                  // Movendo agressiva
 ```
 
 **Explicação do exemplo**: o `Robo` não sabe **como** se mover: delega à `Comportamento` atual. Trocar a estratégia muda o comportamento **sem alterar `Robo`** nem usar `if`. Para acrescentar um modo "furtivo", cria-se uma nova classe que implementa `Comportamento`. Como a interface tem um único método, uma lambda (`() -> System.out.println("...")`) também serviria.
+
+---
+
+## Resumo simples
+
+Padrões comportamentais organizam a comunicação entre objetos e a distribuição de responsabilidades. Eles ajudam a variar comportamentos sem concentrar muitas decisões num único lugar.
 
 ## 6.6 Arquitetura de software
 
@@ -3636,6 +4197,12 @@ class InMemoryTaskRepository implements TaskRepository {
 
 **Explicação do exemplo**: o caso de uso conhece **apenas** a interface `TaskRepository`, que pertence ao domínio. A implementação em memória fica na infraestrutura, e nada no domínio importa classes de Spring ou JPA. Para usar um banco real, cria-se `JpaTaskRepository implements TaskRepository`, **sem alterar** o caso de uso. Nos testes, usa-se a versão em memória, rápida e sem banco.
 
+---
+
+## Resumo simples
+
+Arquitetura de software organiza camadas, responsabilidades e dependências de um sistema. Uma boa arquitetura mantém as regras de negócio mais independentes das tecnologias externas.
+
 ## 6.7 Princípios de design de APIs REST
 
 **O que é**: **REST** (*Representational State Transfer*) é um **estilo arquitetural** para APIs sobre HTTP, centrado em **recursos** identificados por URLs (substantivos) e manipulados pelos **verbos** HTTP. Uma API "RESTful" segue essas convenções, que a tornam previsível.
@@ -3656,7 +4223,7 @@ class InMemoryTaskRepository implements TaskRepository {
 
 **Exemplo**:
 
-```
+```text
 POST   /tasks            {"title":"Estudar"}  →  201 Created
                                                  Location: /tasks/42
 GET    /tasks/42                               →  200 OK      {"id":42,"title":"Estudar","status":"PENDING"}
@@ -3670,6 +4237,12 @@ GET    /tasks?page=0&size=10&sort=title,asc    →  200 OK      (primeira págin
 **Explicação do exemplo**: criar devolve **201** e o endereço do novo recurso em `Location`. `PATCH` altera só o campo enviado. `DELETE` bem-sucedido devolve **204** (nada a mostrar). Buscar um id inexistente devolve **404**, e enviar um corpo inválido devolve **400**. A última linha mostra a paginação por parâmetros de consulta, sem mudar a URL do recurso.
 
 ---
+
+---
+
+## Resumo simples
+
+REST organiza APIs HTTP em torno de recursos identificados por URLs e operações feitas com verbos HTTP. Convenções consistentes tornam a API mais previsível para quem a consome.
 
 # Parte 7: Ecossistema Spring
 
@@ -3729,6 +4302,12 @@ class AppConfig {
 
 **Explicação do exemplo**: ninguém escreve `new PedidoService(...)`: ao iniciar, o Spring detecta as classes anotadas, cria os beans e percebe que `PedidoService` precisa de um `PedidoRepository` e de um `Notificador`. Como há **duas** implementações de `Notificador`, o `@Qualifier("email")` diz qual usar; trocar para `sms` é alterar uma palavra, sem mexer na lógica. Em um teste, basta criar `new PedidoService(repoFalso, notificadorFalso)`. O método `@Bean` ensina o container a fabricar um `PasswordEncoder`, classe que o Spring não conhece.
 
+---
+
+## Resumo simples
+
+Spring gerencia os objetos da aplicação e suas dependências por meio do container IoC. Com injeção de dependência, uma classe recebe de fora aquilo de que precisa para trabalhar.
+
 ## 7.2 Configuração externa e propriedades
 
 **O que é**: separar a **configuração** (URLs, credenciais, portas, parâmetros de negócio) do **código**, para que o **mesmo artefato** rode em ambientes diferentes (desenvolvimento, teste, produção) sem recompilar.
@@ -3766,6 +4345,12 @@ public record AppProps(double taxa, Duration cacheTtl) {}   // app.cache-ttl -> 
 
 **Explicação do exemplo**: o Spring lê `app.taxa` e `app.cache-ttl` e preenche o record `AppProps`, convertendo o texto `PT10M` em `Duration` e usando a convenção *kebab-case* (`cache-ttl`) → *camelCase* (`cacheTtl`). Em produção, definir a variável de ambiente `APP_TAXA=0.20` **sobrepõe** o valor do arquivo sem recompilar. Para o `@ConfigurationProperties` ser registrado, é preciso habilitá-lo (`@EnableConfigurationProperties` ou `@ConfigurationPropertiesScan`).
 
+---
+
+## Resumo simples
+
+Configuração externa guarda valores como endereços, portas e credenciais fora do código. O mesmo programa pode então rodar em ambientes diferentes com configurações próprias.
+
 ## 7.3 Spring Boot
 
 **O que é**: camada sobre o Spring Framework que **elimina a configuração manual** seguindo **"convenção sobre configuração"**: você declara o que quer (dependências) e o Boot configura o resto com padrões sensatos, que você pode sobrescrever.
@@ -3793,6 +4378,12 @@ public class LojaApplication {
 ```
 
 **Explicação do exemplo**: essa classe mínima basta para subir uma aplicação completa. `SpringApplication.run` cria o contexto, aplica a **auto-configuração** conforme as dependências do projeto (por exemplo, com `starter-web` ele sobe um Tomcat na porta 8080) e executa o *component scan* a partir do pacote desta classe. Por isso as demais classes devem ficar no **mesmo pacote ou abaixo** dele.
+
+---
+
+## Resumo simples
+
+Spring Boot simplifica a configuração de aplicações Spring usando padrões e auto-configuração. Ele ajuda a criar aplicações executáveis com menos configuração manual.
 
 ## 7.4 AOP (Programação Orientada a Aspectos)
 
@@ -3829,6 +4420,12 @@ class TempoAspect {
 ```
 
 **Explicação do exemplo**: a expressão do *pointcut* seleciona qualquer método de qualquer classe do pacote `service` e subpacotes. Ao chamar um deles, o proxy executa `medir`: guarda o tempo, chama `pjp.proceed()` (o método de negócio) e, no `finally`, imprime a duração, mesmo que o método lance exceção. Nenhum serviço precisou ser alterado: a medição é aplicada de fora.
+
+---
+
+## Resumo simples
+
+AOP separa preocupações que atravessam várias partes do sistema, como segurança, transações e logs. Aspectos aplicam esse comportamento em pontos definidos sem repetir a lógica em cada método.
 
 ## 7.5 Spring MVC e APIs REST
 
@@ -3889,7 +4486,7 @@ class GlobalExceptionHandler {
 
 **Explicação do exemplo**: ao receber `POST /tasks` com `{"title":""}`, o `@Valid` rejeita o corpo **antes** de entrar no método (resposta **400**). Com um título válido, o Jackson converte o JSON em `CreateTaskRequest`, o caso de uso cria a tarefa e a resposta é **201 Created** com o cabeçalho `Location: /tasks/{id}`. No `GET /tasks/{id}`, se o caso de uso lançar `TaskNotFoundException`, o `@RestControllerAdvice` a captura e devolve **404** com a mensagem: o controller não tem `try/catch`.
 
-### Aprofundamento: OpenAPI e Swagger (documentação de APIs REST)
+### 7.5.1 Aprofundamento: OpenAPI e Swagger (documentação de APIs REST)
 
 **O que é**: **OpenAPI** é uma **especificação** (um documento JSON ou YAML) que descreve o **contrato** de uma API REST: caminhos, verbos, parâmetros, corpos de requisição e resposta, esquemas dos objetos, códigos de status e a segurança exigida. **Swagger** é o nome do conjunto de ferramentas criado em torno dela (e o antigo nome da especificação); a mais conhecida é a **Swagger UI**, uma página que lê o documento OpenAPI e exibe uma **documentação interativa**, na qual dá para **enviar requisições reais** (botão *Try it out*). No Spring, a biblioteca **springdoc-openapi** **gera o documento automaticamente**, inspecionando controllers, DTOs e validações.
 
@@ -3975,6 +4572,12 @@ springdoc:
 
 **Explicação do exemplo**: só com a dependência, o springdoc já publica `/v3/api-docs` e a Swagger UI em `/swagger-ui.html`. A classe `OpenApiConfig` define o título e a versão e declara o esquema de segurança `basicAuth` (HTTP Basic, tópico 7.11); o `@SecurityRequirement` no controller faz a UI exibir o botão **Authorize** e enviar as credenciais nas chamadas. No *record*, `@NotBlank` e `@Size` aparecem **automaticamente** como campo obrigatório e limites de tamanho, e o `@Schema` acrescenta descrição e exemplo, que a UI usa para preencher o corpo do *Try it out*. As anotações `@Operation` e `@ApiResponse` descrevem o que o código sozinho não conta: o sentido de cada endpoint e os erros possíveis. Por fim, o perfil `prod` desliga o documento e a UI, para não expor o contrato da API publicamente.
 
+---
+
+## Resumo simples
+
+Spring MVC recebe requisições HTTP, encaminha cada uma ao controller adequado e transforma dados entre JSON e objetos Java. É uma base comum para criar APIs REST.
+
 ## 7.6 Spring Data JPA
 
 **O que é**: módulo que **gera repositórios a partir de interfaces**, em cima de JPA/Hibernate. Você declara uma interface que estende um repositório base, e o Spring fornece a implementação em tempo de execução (por *proxy*).
@@ -4025,6 +4628,12 @@ System.out.println(pagina.getTotalElements() + " " + pagina.getContent().size())
 
 **Explicação do exemplo**: nenhuma das implementações foi escrita: `findByNomeStartingWithIgnoreCase` gera `WHERE UPPER(nome) LIKE 'ANA%'`, e `existsByEmail` gera uma consulta de existência. O `cadastrar` roda em **uma transação**: se `save` ou qualquer etapa lançar exceção *unchecked*, tudo sofre *rollback*. A consulta paginada pede a **primeira página de 10 clientes ordenados por nome** e devolve, além do conteúdo, o **total** de registros ativos (`getTotalElements`).
 
+---
+
+## Resumo simples
+
+Spring Data JPA cria implementações de repositórios a partir de interfaces. Isso reduz código repetitivo para salvar, buscar, atualizar e remover dados.
+
 ## 7.7 Spring Data REST
 
 **O que é**: módulo que **expõe repositórios Spring Data como uma API REST HATEOAS automaticamente**, **sem escrever controller**: CRUD, paginação, ordenação e busca (`/search`) já vêm prontos, em formato **HAL** (com links). Inclui um *HAL Explorer* para navegar pela API.
@@ -4055,6 +4664,12 @@ public interface CustomerEntityRepository extends ListCrudRepository<Customer, U
 ```
 
 **Explicação do exemplo**: só de declarar a interface, a aplicação ganha `GET/POST/PUT/PATCH` em `/customers` e uma busca em `/customers/search/...`. O `@RestResource(exported = false)` em `deleteById` faz o endpoint `DELETE /customers/{id}` **deixar de existir**, protegendo os dados de remoção pela API.
+
+---
+
+## Resumo simples
+
+Spring Data REST pode expor repositórios como API REST com operações comuns e links HATEOAS. É útil para protótipos e APIs simples, mas exige avaliar com cuidado o que ficará exposto.
 
 ## 7.8 Spring Data MongoDB
 
@@ -4088,6 +4703,12 @@ public interface EventMetadataRepository extends MongoRepository<EventMetadata, 
 ```
 
 **Explicação do exemplo**: um show de rock e uma peça de teatro podem ter `technicalRequirements` completamente diferentes; como é um `Map`, cada documento guarda os campos que fizerem sentido, sem alterar um esquema. Os setores ficam **embutidos** no documento, e carregá-los é uma única leitura. O `findByEventId` é gerado pelo nome, como nos repositórios JPA.
+
+---
+
+## Resumo simples
+
+Spring Data MongoDB integra aplicações Spring a um banco documental. Os dados são guardados como documentos BSON em collections, com estrutura flexível.
 
 ## 7.9 Spring Data Redis e cache
 
@@ -4135,6 +4756,12 @@ Boolean ok = redisTemplate.opsForValue().setIfAbsent("seat:A1", cliente, Duratio
 ```
 
 **Explicação do exemplo**: na primeira chamada a `listar()` o método executa e o resultado vai para o cache `vitrine`; nas seguintes, devolve do Redis **sem consultar o banco** até o cache ser invalidado ou expirar. O `unless` evita guardar uma lista vazia por engano. O `SeatLock` some sozinho em 30 s, liberando o assento se o cliente desistir. O `setIfAbsent` com expiração é **uma única operação atômica**: se duas pessoas tentam reservar o assento A1 no mesmo instante, **apenas uma** recebe `true`.
+
+---
+
+## Resumo simples
+
+Redis é um banco chave-valor em memória, com alta velocidade e expiração por tempo. Spring Data Redis conecta a aplicação a ele, frequentemente para cache e dados temporários.
 
 ## 7.10 Eventos, assincronismo e agendamento
 
@@ -4184,6 +4811,12 @@ void limpezaNoturna() { /* ... */ }
 
 **Explicação do exemplo**: `criar` salva o cliente e **publica** o evento dentro da transação. O `VendasListener` só é acionado **depois do *commit***, em outra thread (`@Async`), então o cadastro não espera o módulo de vendas e, se o `save` falhar, o evento nunca é processado. O módulo de cadastro **não conhece** o de vendas: só publica um fato. A rotina `limpezaNoturna` é disparada pelo agendador às 3h.
 
+---
+
+## Resumo simples
+
+Eventos permitem que componentes avisem outros sem dependerem diretamente deles; @Async executa tarefas em outra thread; e @Scheduled agenda rotinas. Juntos, ajudam a desacoplar e automatizar trabalho.
+
 ## 7.11 Spring Security
 
 **O que é**: framework de **autenticação** (*quem é você?*) e **autorização** (*o que você pode fazer?*). Funciona como uma **cadeia de filtros servlet** (`SecurityFilterChain`) executada **antes** de a requisição chegar ao controller. Ao incluir o *starter* de segurança, **todos os endpoints passam a exigir autenticação** (com uma senha gerada no log) até você configurar.
@@ -4194,7 +4827,7 @@ void limpezaNoturna() { /* ... */ }
 
 **Fluxo de autenticação**:
 
-```
+```text
 Filtro (monta um Authentication NÃO autenticado: usuário + senha)
   → AuthenticationManager (ProviderManager)
     → DaoAuthenticationProvider
@@ -4248,7 +4881,7 @@ class PropostaController {
 
 **Explicação do exemplo**: a cadeia libera só o endpoint de login e exige autenticação para todo o resto. A anotação `@PreAuthorize` restringe **este método** a quem tem o papel `INFLUENCER`: um usuário autenticado com outro papel recebe **403**. O `@AuthenticationPrincipal` entrega o usuário já autenticado, sem consultar o banco de novo. O `BCryptPasswordEncoder` é o *bean* usado pelo provedor para conferir senhas armazenadas como *hash*. (Neste exemplo, o CSRF está desligado porque se supõe uma API *stateless*; com sessão por cookie, não desligue.)
 
-### Aprofundamento: HTTP Basic, BCrypt e *roles* na prática
+### 7.11.1 Aprofundamento: HTTP Basic, BCrypt e *roles* na prática
 
 **O que é**: complemento do fluxo de autenticação visto acima, com três peças que aparecem juntas em quase toda API de estudo ou serviço interno. O **HTTP Basic** é o esquema de autenticação **mais simples** do protocolo: o cliente envia, **em toda requisição**, o cabeçalho `Authorization: Basic <base64(usuario:senha)>`. O **BCrypt** é o algoritmo de ***hash*** usado para guardar as senhas. As ***roles*** (papéis) definem **o que** cada usuário autenticado pode fazer.
 
@@ -4332,6 +4965,12 @@ curl -u admin:admin123 -X DELETE http://localhost:8080/api/produtos/1   # 204 (A
 
 **Explicação do exemplo**: a cadeia exige autenticação em tudo e usa o HTTP Basic sem sessão. A primeira regra libera a **leitura** para `USER` e `ADMIN`; a segunda, mais geral, restringe os **demais verbos** ao `ADMIN` (a ordem importa: invertendo, o `GET` do `USER` cairia na regra do `ADMIN`). O `UserDetailsService` em memória guarda apenas **hashes BCrypt**, nunca as senhas em texto puro. Nos `curl`, a primeira chamada sem credenciais recebe **401** e o desafio `WWW-Authenticate`; a de `ana` passa na leitura, mas é barrada no `DELETE` com **403**, porque está autenticada e não tem o papel exigido; o `admin` completa a operação. No bloco do BCrypt, `h1` e `h2` diferem por causa do *salt* aleatório, e mesmo assim `matches` valida: a versão, o custo e o *salt* estão no próprio *hash*. (Usuários e senhas fixos no código são só para estudo.)
 
+---
+
+## Resumo simples
+
+Spring Security protege aplicações com autenticação e autorização por meio de filtros. As regras definem quem pode acessar cada recurso e em quais condições.
+
 ## 7.12 Spring Cloud OpenFeign e resiliência
 
 **O que é**: o **OpenFeign** é um **cliente HTTP declarativo**: você descreve o contrato de uma API externa em uma **interface**, com as mesmas anotações do Spring MVC, e o framework gera a **implementação** (por proxy). Evita montar URLs, serializar/desserializar JSON e tratar erros à mão com `RestTemplate`/`WebClient`. (O Spring Cloud OpenFeign está em modo de manutenção; a alternativa nativa são as interfaces `@HttpExchange` com `RestClient`. Verifique o status atual.)
@@ -4345,7 +4984,7 @@ curl -u admin:admin123 -X DELETE http://localhost:8080/api/produtos/1   # 204 (A
 - **Por que resiliência**: chamadas remotas **falham ou ficam lentas**, e uma dependência lenta pode **prender todas as threads** e derrubar sua aplicação em cascata.
 - **Circuit Breaker (Resilience4j)**: observa as chamadas e funciona como uma máquina de estados:
 
-```
+```text
   CLOSED ──(falhas acima do limite)──▶ OPEN ──(tempo de espera)──▶ HALF-OPEN
      ▲                                                                  │
      └────────────(chamadas de teste com sucesso)───────────────────────┘
@@ -4381,6 +5020,12 @@ spring.cloud.openfeign.circuitbreaker.enabled=true
 ```
 
 **Explicação do exemplo**: chamar `consultar("123")` produz um `GET http://localhost:3001/sanctions/companies/123` sem nenhum código HTTP escrito. Se o serviço estiver fora do ar, estourar o *timeout* de 3 s ou o circuito estiver aberto, o Feign executa o `Fallback`. Aqui o fallback **lança uma exceção** (*fail-closed*): a análise de risco é interrompida em vez de concluir, erradamente, que "não há sanções". Se a regra do negócio permitir, o fallback poderia marcar a empresa como "revisão manual".
+
+---
+
+## Resumo simples
+
+OpenFeign cria clientes HTTP a partir de interfaces declarativas, reduzindo código de integração manual. Resiliência acrescenta estratégias para lidar com falhas de serviços externos.
 
 ## 7.13 Testes no Spring
 
@@ -4434,7 +5079,7 @@ class ClienteRepositoryTest {
 
 **Explicação do exemplo**: o primeiro teste sobe **só a camada web** e usa `MockMvc` para simular um `POST` com título vazio, verificando o **400** da validação, sem servidor, banco ou caso de uso real (substituído pelo `@MockitoBean`). O segundo sobe **só o JPA** com banco em memória, salva um cliente e confirma a consulta derivada `existsByEmail`; ao final, a transação é desfeita, deixando o banco limpo para o próximo teste.
 
-### Aprofundamento: testes de integração com Testcontainers
+### 7.13.1 Aprofundamento: testes de integração com Testcontainers
 
 **O que é**: o **Testcontainers** é uma biblioteca Java que, durante o teste, **sobe contêineres Docker descartáveis** (banco de dados, Redis, Kafka...) e os remove ao final. Um **teste de integração** exercita **várias peças reais juntas** (controller, serviço, repositório e banco), em oposição ao teste unitário, que isola uma classe com dublês. O Testcontainers permite que essa integração use o **mesmo tipo de banco da produção**, sem instalar nada na máquina.
 
@@ -4506,6 +5151,12 @@ class PedidoRepositoryIT {
 
 **Explicação do exemplo**: o campo `static` com `@Container` faz o MySQL **subir uma vez** para a classe inteira, e o `@ServiceConnection` registra automaticamente a URL e as credenciais no `DataSource`, sem nenhuma propriedade no teste. O `@BeforeEach` esvazia a tabela, de modo que um teste não enxerga os dados do outro. O segundo teste (que supõe um campo `numero` mapeado com `@Column(unique = true)`) só faz sentido com o **banco real**: a violação da restrição `UNIQUE` vem do MySQL e se traduz em `DataIntegrityViolationException`; o `saveAndFlush` envia o SQL na hora (sem ele, o erro só apareceria no *commit*). Com H2, esse mesmo teste poderia passar ou falhar por motivos diferentes dos de produção. (Para Spring Boot 3 / Testcontainers 1.x, troque os artefatos por `junit-jupiter` e `mysql` e importe `org.testcontainers.containers.MySQLContainer`.)
 
+---
+
+## Resumo simples
+
+O starter de testes do Spring reúne ferramentas para testar código isolado e aplicações integradas. A escolha do teste depende de quais componentes reais precisam ser verificados.
+
 ## 7.14 Observabilidade, empacotamento e execução
 
 **O que é**: **observabilidade** é a capacidade de entender **o que a aplicação está fazendo em produção** a partir do que ela emite. As três bases: **logs** (eventos), **métricas** (números ao longo do tempo) e **traces** (o caminho de uma requisição por vários serviços). **Empacotamento e execução** tratam de entregar a aplicação de forma reprodutível (JAR, contêiner).
@@ -4553,7 +5204,7 @@ services:
 
 **Explicação do exemplo**: o primeiro trecho expõe só quatro endpoints do Actuator e mostra os detalhes da saúde apenas para usuários autorizados. Com isso, o Prometheus pode coletar `/actuator/prometheus` e o orquestrador pode consultar `/actuator/health`. No `compose.yml`, a aplicação só inicia depois que o *healthcheck* do banco passa, evitando erros de conexão na partida. (As credenciais `root/root` são só para desenvolvimento local.)
 
-### Aprofundamento: logs, métricas e *traces* com Actuator, Micrometer, Prometheus e Grafana
+### 7.14.1 Aprofundamento: logs, métricas e *traces* com Actuator, Micrometer, Prometheus e Grafana
 
 **O que é**: detalhamento da observabilidade vista acima. Cada ferramenta tem um papel em uma cadeia: o **Actuator** expõe a aplicação para operação; o **Micrometer** **coleta e padroniza** as métricas; o **Prometheus** **armazena** as métricas como séries temporais; o **Grafana** as **exibe** em painéis e dispara alertas. Os três "pilares" são complementares, não concorrentes.
 
@@ -4687,6 +5338,12 @@ scrape_configs:
 
 **Explicação do exemplo**: o Actuator publica `/actuator/prometheus` e o Micrometer rotula tudo com `application=loja`. No serviço, o `Counter` e o `Timer` viram as métricas `pedidos_criados_total` e `pedidos_criacao_tempo_seconds_*`, sem nenhum código específico do Prometheus (a fachada cuida da conversão). A *tag* `canal` tem um único valor possível, portanto não gera explosão de séries. O `prometheus.yml` manda coletar o endpoint do serviço `app` a cada 15 s (dentro da rede do Compose, o nome do serviço é o endereço). No Grafana, basta cadastrar o Prometheus (`http://prometheus:9090`) como fonte de dados e criar os painéis com PromQL, por exemplo `rate(pedidos_criados_total[5m])`. (As versões das imagens são ilustrativas.)
 
+---
+
+## Resumo simples
+
+Observabilidade ajuda a entender o que ocorre numa aplicação por meio de logs, métricas e traces. Empacotamento e execução tornam a entrega e a operação do programa reproduzíveis.
+
 ## 7.15 Docker e Docker Compose
 
 **O que é**: o **Docker** é uma plataforma para empacotar e executar aplicações em **contêineres**: processos **isolados** (pelo kernel do Linux) que carregam a aplicação **e tudo de que ela precisa** (JRE, bibliotecas, configuração), compartilhando o kernel do computador hospedeiro. Diferem das **máquinas virtuais**, que trazem um sistema operacional inteiro e por isso são maiores e mais lentas para iniciar. Os conceitos centrais:
@@ -4809,6 +5466,12 @@ docker compose down -v                         # remove também os volumes: o ba
 
 **Explicação do exemplo**: o *Dockerfile* tem dois estágios: o primeiro compila com o JDK e o Maven Wrapper (tópico 5.4), baixando as dependências **antes** de copiar o código, para reaproveitar o *cache*; o segundo parte de uma imagem só com o JRE, copia apenas o JAR e roda como usuário comum. O `compose.yaml` sobe o banco com um **volume nomeado** (os dados sobrevivem a `down`) e um *healthcheck*, e a aplicação, que só inicia depois que o banco responde. A URL do banco usa `db`, o **nome do serviço**, e não `localhost`. A senha vem do `.env` e é injetada por variável de ambiente, o que o Spring converte nas propriedades `spring.datasource.*`. Nenhuma senha fica na imagem. (O usuário `root` é só para desenvolvimento local; em produção, crie um usuário próprio com permissões mínimas.)
 
+---
+
+## Resumo simples
+
+Docker empacota aplicações e dependências em imagens que rodam como contêineres isolados. Docker Compose descreve vários serviços e como executá-los juntos.
+
 ## 7.16 Spring AI
 
 **O que é**: projeto do ecossistema Spring que leva a **IA generativa** para aplicações Java. Oferece uma API **portátil** para conversar com **LLMs** (*Large Language Models*, como os da OpenAI, Anthropic, Google ou modelos locais via Ollama), no mesmo estilo do Spring Data para bancos: uma abstração, auto-configuração e *starters* por provedor, de modo que trocar de fornecedor é, em grande parte, trocar a dependência e as propriedades. Além do chat, cobre *embeddings*, bancos vetoriais, RAG e o protocolo MCP. **Versões**: o Spring AI **2.x** (disponível desde junho de 2026) roda sobre o **Spring Boot 4**; a série **1.x** é a das aplicações Spring Boot 3. A API evolui rápido: confira a documentação da versão que você usa.
@@ -4924,6 +5587,12 @@ class AssistenteController {
 **Explicação do exemplo**: o BOM e o *starter* configuram o modelo, e a chave vem da variável de ambiente. O `PedidoTools` expõe um método como ferramenta: quando o cliente perguntar "como está o pedido 42?", o modelo **pede** a chamada de `statusDoPedido(42)`, o Spring AI executa o método, devolve o texto ao modelo e este redige a resposta final. O cliente `suporte` combina três recursos: o `system` fixa o comportamento, o `MessageChatMemoryAdvisor` repassa o histórico (usando o `ChatMemory` em memória, que o Boot configura sozinho) e o `conversationId` da URL **separa** as conversas, de forma que a pergunta "e o anterior?" faz sentido para o modelo. O `builder.clone()` evita que a configuração do `suporte` vaze para o `extrator`. No `/chamados/classificar`, o `.entity(...)` faz o Spring AI pedir um JSON no formato do *record* e **converter** a resposta em um objeto Java, que pode então ser validado como qualquer DTO. (O endpoint de chat não tem autenticação nem limite de uso: em produção, protegê-lo é indispensável, pois cada chamada custa dinheiro.)
 
 ---
+
+---
+
+## Resumo simples
+
+Spring AI integra aplicações Java a modelos de IA generativa por meio de abstrações do ecossistema Spring. Também oferece recursos para embeddings, bancos vetoriais, RAG e MCP.
 
 # Checklist de revisão
 
